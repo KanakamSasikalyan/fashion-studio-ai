@@ -1,7 +1,10 @@
 package io.metaverse.fashion.studio.service;
 
+import io.metaverse.fashion.studio.repository.ImageRepository;
+import io.metaverse.fashion.studio.entity.ImageEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -24,6 +27,9 @@ public class AIClothingService {
     private String outputDir;
 
     private final String pythonScriptPath;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     public AIClothingService(String pythonScriptPath) {
         this.pythonScriptPath = pythonScriptPath;
@@ -61,7 +67,6 @@ public class AIClothingService {
         }
 
         try {
-
             process = pb.start();
             String imagePath = new BufferedReader(
                     new InputStreamReader(process.getInputStream())
@@ -74,7 +79,15 @@ public class AIClothingService {
                 throw new RuntimeException("AI generation failed:\n" + error);
             }
 
-            return Files.readAllBytes(Paths.get(imagePath));
+            // Save image to database
+            byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
+            ImageEntity imageEntity = new ImageEntity();
+            imageEntity.setPrompt(prompt);
+            imageEntity.setStyle(style);
+            imageEntity.setImageData(imageBytes);
+            imageRepository.save(imageEntity);
+
+            return imageBytes;
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

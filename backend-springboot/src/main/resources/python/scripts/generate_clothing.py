@@ -41,7 +41,7 @@ def main():
         output_dir = sys.argv[3]
         logger.info(f"Prompt: '{prompt}' | Style: {style}")
 
-        # Hardware chec-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++k
+        # Hardware check
         log_hardware_info()
 
         # Model loading
