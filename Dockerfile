@@ -26,6 +26,12 @@ COPY src src
 # Build the application
 RUN ./mvnw package -DskipTests
 
+# Ensure the target directory exists
+RUN mkdir -p target
+
+# Copy the JAR file to the correct location
+COPY target/backend-springboot-0.0.1-SNAPSHOT.jar target/backend-springboot-0.0.1-SNAPSHOT.jar
+
 # Expose the port the app runs on
 EXPOSE 8080
 
