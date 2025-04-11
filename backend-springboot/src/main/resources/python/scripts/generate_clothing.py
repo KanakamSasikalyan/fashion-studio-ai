@@ -84,6 +84,9 @@ def main():
         # Return path to Spring Boot
         print(output_path)
 
+        # Save image path to database
+        logger.info(f"Image path returned: {output_path}")
+
         logger.info(f"Total execution time: {time.time() - start_time:.2f}s")
 
     except Exception as e:
