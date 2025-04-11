@@ -10,10 +10,10 @@ WORKDIR /app
 COPY . .
 
 # Build the Spring Boot application
-RUN mvn -f pom.xml clean package
+RUN mvn clean package
 
 # Copy the built JAR file
-COPY target/backend-springboot-0.0.1-SNAPSHOT.jar app.jar
+COPY target/*.jar app.jar
 
 # Install Python dependencies
 RUN pip3 install diffusers torch psutil
