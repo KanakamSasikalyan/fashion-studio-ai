@@ -26,14 +26,11 @@ COPY src src
 # Build the application
 RUN ./mvnw package -DskipTests
 
-# Ensure the target directory exists
-RUN mkdir -p target
-
-# Copy any JAR file from the target directory to the container
-COPY target/*.jar target/
+# Copy the specific JAR file to the container as app.jar
+COPY target/backend-springboot-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
 
 # Set the entry point to run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "target/backend-springboot-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
