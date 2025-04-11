@@ -14,6 +14,9 @@ WORKDIR /app
 COPY mvnw pom.xml .
 COPY .mvn .mvn
 
+# Grant executable permissions to the mvnw script
+RUN chmod +x ./mvnw
+
 # Fetch Maven dependencies
 RUN ./mvnw dependency:resolve
 
