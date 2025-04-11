@@ -1,14 +1,19 @@
 FROM openjdk:17-jdk-slim
 
 # Install Python and dependencies
-RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y python3 python3-pip maven && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy Spring Boot JAR and Python script
+# Copy project files
+COPY . .
+
+# Build the Spring Boot application
+RUN mvn clean package
+
+# Copy the built JAR file
 COPY target/backend-springboot-0.0.1-SNAPSHOT.jar app.jar
-COPY src/main/resources/python/scripts/ scripts/
 
 # Install Python dependencies
 RUN pip3 install diffusers torch psutil
