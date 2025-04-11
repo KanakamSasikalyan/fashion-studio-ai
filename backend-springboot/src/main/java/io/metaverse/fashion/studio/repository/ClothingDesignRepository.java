@@ -1,9 +1,9 @@
 package io.metaverse.fashion.studio.repository;
 
-import io.metaverse.fashion.studio.entity.ImageEntity;
+import io.metaverse.fashion.studio.entity.ClothingDesign;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ImageRepository extends JpaRepository<ImageEntity, Long> {
+public interface ClothingDesignRepository extends JpaRepository<ClothingDesign, Long> {
 }

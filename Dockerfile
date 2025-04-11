@@ -1,25 +1,30 @@
+# Use an official OpenJDK runtime as a parent image
 FROM openjdk:17-jdk-slim
 
-# Install Python, Maven, and dependencies
-RUN apt-get update && apt-get install -y python3 python3-pip maven && rm -rf /var/lib/apt/lists/*
+# Install Python and required dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy project files
-COPY . .
+# Copy the Maven wrapper and pom.xml to the container
+COPY mvnw pom.xml .
+COPY .mvn .mvn
 
-# Build the Spring Boot application
-RUN mvn clean package
+# Fetch Maven dependencies
+RUN ./mvnw dependency:resolve
 
-# Copy the built JAR file
-COPY target/*.jar app.jar
+# Copy the project source code to the container
+COPY src src
 
-# Install Python dependencies
-RUN pip3 install diffusers torch psutil
+# Build the application
+RUN ./mvnw package -DskipTests
 
-# Expose port
+# Expose the port the app runs on
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Set the entry point to run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "target/backend-springboot-0.0.1-SNAPSHOT.jar"]

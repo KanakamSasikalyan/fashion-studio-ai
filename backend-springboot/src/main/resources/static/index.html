@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Generate Design</title>
+</head>
+<body>
+    <h1>Generate Clothing Design</h1>
+    <form id="generateForm">
+        <label for="prompt">Prompt:</label>
+        <input type="text" id="prompt" name="prompt" required>
+        <br>
+        <label for="style">Style:</label>
+        <select id="style" name="style">
+            <option value="casual">Casual</option>
+            <option value="formal">Formal</option>
+            <option value="sporty">Sporty</option>
+        </select>
+        <br>
+        <button type="submit">Generate</button>
+    </form>
+    <p id="responseMessage"></p>
+
+    <script>
+        document.getElementById('generateForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const prompt = document.getElementById('prompt').value;
+            const style = document.getElementById('style').value;
+
+            try {
+                const response = await fetch(`/api/designs/${encodeURIComponent(prompt)}?style=${style}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('responseMessage').innerHTML = `Image generated successfully. Check the database. <br><img src="${url}" alt="Generated Design" style="max-width: 300px;">`;
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('responseMessage').textContent = `Error: ${errorText}`;
+                }
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 package io.metaverse.fashion.studio.controller;
 
-import io.metaverse.fashion.studio.entity.ImageEntity;
-import io.metaverse.fashion.studio.repository.ImageRepository;
+import io.metaverse.fashion.studio.entity.ClothingDesign;
+import io.metaverse.fashion.studio.repository.ClothingDesignRepository;
 import io.metaverse.fashion.studio.service.AIClothingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,7 +19,7 @@ public class DesignController {
     private final AIClothingService aiService;
 
     @Autowired
-    private ImageRepository imageRepository;
+    private ClothingDesignRepository clothingDesignRepository;
 
     public DesignController(AIClothingService aiService) {
         this.aiService = aiService;
@@ -42,9 +42,9 @@ public class DesignController {
     @GetMapping(value = "/{id}", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> getDesign(@PathVariable Long id) {
         try {
-            ImageEntity imageEntity = imageRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Image not found"));
-            return ResponseEntity.ok().body(imageEntity.getImageData());
+            ClothingDesign design = clothingDesignRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Design not found"));
+            return ResponseEntity.ok().body(design.getImageData());
         } catch (Exception e) {
             return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
         }

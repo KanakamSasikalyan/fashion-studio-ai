@@ -3,8 +3,8 @@ package io.metaverse.fashion.studio.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "images")
-public class ImageEntity {
+@Table(name = "clothing_designs")
+public class ClothingDesign {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
