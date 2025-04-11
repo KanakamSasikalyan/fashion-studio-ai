@@ -41,7 +41,7 @@ def main():
         output_dir = sys.argv[3]
         logger.info(f"Prompt: '{prompt}' | Style: {style}")
 
-        # Hardware chec-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++k
+        # Hardware check
         log_hardware_info()
 
         # Model loading
@@ -83,6 +83,9 @@ def main():
 
         # Return path to Spring Boot
         print(output_path)
+
+        # Save image path to database
+        logger.info(f"Image path returned: {output_path}")
 
         logger.info(f"Total execution time: {time.time() - start_time:.2f}s")
 
