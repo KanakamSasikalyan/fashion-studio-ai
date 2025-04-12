@@ -23,6 +23,9 @@ RUN ./mvnw dependency:resolve
 # Copy the project source code to the container
 COPY src src
 
+# Create the target directory
+RUN mkdir -p target
+
 # Build the application
 RUN ./mvnw package -DskipTests
 
