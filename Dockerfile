@@ -23,17 +23,11 @@ RUN ./mvnw dependency:resolve
 # Copy the project source code to the container
 COPY src src
 
-# Build the application and skip tests (with debug logs for troubleshooting)
-RUN ./mvnw package -DskipTests -X
+# Build the application and skip tests (ensure it creates the JAR file)
+RUN ./mvnw package -DskipTests
 
-# Ensure target directory is created (it should be created by the build, but it's good practice to explicitly handle it)
-RUN mkdir -p target
-
-# Add a check to see if the JAR file exists in target
-RUN ls -al target/  # List files in the target directory
-
-# Copy any JAR file from the target directory to the container as app.jar
-COPY target/*.jar app.jar
+# Copy the JAR file from the target directory (explicitly naming the file)
+COPY target/studio-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
