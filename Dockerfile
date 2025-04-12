@@ -26,8 +26,8 @@ COPY src src
 # Build the application
 RUN ./mvnw package -DskipTests
 
-# Copy the specific JAR file to the container as app.jar
-COPY target/backend-springboot-0.0.1-SNAPSHOT.jar app.jar
+# Copy any JAR file from the target directory to the container as app.jar
+COPY target/*.jar app.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
