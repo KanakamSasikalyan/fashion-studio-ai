@@ -1,7 +1,7 @@
 # Use an official OpenJDK runtime as a parent image
 FROM openjdk:17-jdk-slim
 
-# Install Python and required dependencies
+# Install Python and required dependencies (just in case your app uses it for some reason)
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy the Maven wrapper and pom.xml to the container
-COPY mvnw pom.xml .
+COPY mvnw pom.xml . 
 COPY .mvn .mvn
 
 # Grant executable permissions to the mvnw script
@@ -23,13 +23,14 @@ RUN ./mvnw dependency:resolve
 # Copy the project source code to the container
 COPY src src
 
-# Create the target directory
+# Build the application and skip tests (but ensure a proper exit status for the build)
+RUN ./mvnw package -DskipTests
+
+# Ensure target directory is created (it should be created by the build, but it's good practice to explicitly handle it)
 RUN mkdir -p target
 
-# Build the application
-RUN ./mvnw package -DskipTests || mkdir -p target
-
 # Copy any JAR file from the target directory to the container as app.jar
+# This will ensure the target directory exists and contains a JAR file
 COPY target/*.jar app.jar
 
 # Expose the port the app runs on
