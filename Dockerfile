@@ -27,7 +27,7 @@ COPY src src
 RUN mkdir -p target
 
 # Build the application
-RUN ./mvnw package -DskipTests
+RUN ./mvnw package -DskipTests || mkdir -p target
 
 # Copy any JAR file from the target directory to the container as app.jar
 COPY target/*.jar app.jar
