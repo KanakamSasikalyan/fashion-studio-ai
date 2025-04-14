@@ -32,8 +32,9 @@ RUN ./mvnw package -DskipTests
 # Copy the generated JAR file to the container
 COPY target/*.jar app.jar
 
-# Expose the port the app runs on
+# Expose the port the app runs on (Render uses the PORT environment variable)
 EXPOSE 8080
 
 # Set the entry point to run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Use the PORT environment variable provided by Render
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=${PORT}"]
