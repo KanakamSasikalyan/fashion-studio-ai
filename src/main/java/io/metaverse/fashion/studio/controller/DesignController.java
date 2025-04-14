@@ -33,7 +33,7 @@ public class DesignController {
         try {
             String decodedPrompt = URLDecoder.decode(prompt, StandardCharsets.UTF_8);
             byte[] imageBytes = aiService.generateClothingDesign(decodedPrompt, style);
-            return ResponseEntity.ok().body(imageBytes);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(imageBytes);
         } catch (IOException e) {
             return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
         }
