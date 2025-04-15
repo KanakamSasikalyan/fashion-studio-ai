@@ -36,6 +36,8 @@ public class DesignController {
             return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(imageBytes);
         } catch (IOException e) {
             return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
