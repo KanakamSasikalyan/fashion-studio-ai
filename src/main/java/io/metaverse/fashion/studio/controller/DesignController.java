@@ -39,14 +39,14 @@ public class DesignController {
         }
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> getDesign(@PathVariable Long id) {
-        try {
-            ClothingDesign design = clothingDesignRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Design not found"));
-            return ResponseEntity.ok().body(design.getImageData());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
-        }
-    }
+    // @GetMapping(value = "/{id}", produces = MediaType.IMAGE_PNG_VALUE)
+    // public ResponseEntity<byte[]> getDesign(@PathVariable Long id) {
+    //     try {
+    //         ClothingDesign design = clothingDesignRepository.findById(id)
+    //                 .orElseThrow(() -> new RuntimeException("Design not found"));
+    //         return ResponseEntity.ok().body(design.getImageData());
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
+    //     }
+    // }
 }
