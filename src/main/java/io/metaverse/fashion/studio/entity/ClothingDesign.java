@@ -15,7 +15,7 @@ public class ClothingDesign {
     private String style;
 
     @Lob
-    @Column(length = 10000000)  // Increase if needed for large images
+    @Column(length = 10000000)  // Ensure sufficient length for large images
     private byte[] imageData;
 
     // Getters and Setters

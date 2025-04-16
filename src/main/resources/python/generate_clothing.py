@@ -81,11 +81,14 @@ def main():
         image.save(output_path)
         logger.info(f"Image saved to: {output_path}")
 
-        # Return path to Spring Boot
-        print(output_path)
+        # Return Base64-encoded image data to Spring Boot
+        import base64
+        with open(output_path, "rb") as image_file:
+            base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-        # Save image path to database
-        logger.info(f"Image path returned: {output_path}")
+        print(base64_image)  # Return Base64 string to Java service
+
+        logger.info(f"Base64 image data returned to Spring Boot")
 
         logger.info(f"Total execution time: {time.time() - start_time:.2f}s")
 
