@@ -30,12 +30,8 @@
             const style = document.getElementById('style').value;
 
             try {
-                const response = await fetch(`/api/designs`, {
+                const response = await fetch(`/api/designs/${encodeURIComponent(prompt)}?style=${encodeURIComponent(style)}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt, style })
                 });
 
                 if (response.ok) {
