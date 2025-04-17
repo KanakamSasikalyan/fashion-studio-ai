@@ -52,7 +52,7 @@ public class UserService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(password);
-        return saveUser(user);
+        return userRepository.save(user);
     }
 
     private String sha256Hash(String password) {
