@@ -14,7 +14,7 @@ public class PythonConfig {
 
     @Bean
     public String pythonScriptPath() throws IOException {
-        ClassPathResource resource = new ClassPathResource("python/generate_clothing.py.bkp");
+        ClassPathResource resource = new ClassPathResource("python/generate_clothing.py");
         File tempFile = File.createTempFile("generate_clothing", ".py");
         try (InputStream in = resource.getInputStream();
              OutputStream out = new FileOutputStream(tempFile)) {
