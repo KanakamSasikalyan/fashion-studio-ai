@@ -1,3 +1,6 @@
 torch
+numpy
+Pillow
 diffusers
 psutil
+cloudinary
