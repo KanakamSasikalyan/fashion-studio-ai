@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/designs")
+@CrossOrigin(origins = "*") // Allow all origins
 public class DesignController {
 
     private final AIClothingService aiService;
