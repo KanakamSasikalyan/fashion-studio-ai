@@ -78,27 +78,30 @@ public class AIClothingService {
             }
         }
 
-        try {
-            log.debug("Attempting to read Base64 image from process output");
-            String base64Image = new BufferedReader(
-                    new InputStreamReader(process.getInputStream())
-            ).readLine();
-
-            log.debug("Waiting for Python process to complete");
-            int exitCode = process.waitFor();
-            log.info("Python process exited with code: {}", exitCode);
-
-            if (exitCode != 0) {
-                String error = new BufferedReader(
-                        new InputStreamReader(process.getErrorStream())
-                ).lines().collect(Collectors.joining("\n"));
-                log.error("AI generation failed with exit code: {}. Error: {}", exitCode, error);
-                throw new RuntimeException("AI generation failed:\n" + error);
-            }
+//        try {
+//            log.debug("Attempting to read Base64 image from process output");
+//            String base64Image = new BufferedReader(
+//                    new InputStreamReader(process.getInputStream())
+//            ).readLine();
+//
+//            log.debug("Waiting for Python process to complete");
+//            int exitCode = process.waitFor();
+//            log.info("Python process exited with code: {}", exitCode);
+//
+//            if (exitCode != 0) {
+//                String error = new BufferedReader(
+//                        new InputStreamReader(process.getErrorStream())
+//                ).lines().collect(Collectors.joining("\n"));
+//                log.error("AI generation failed with exit code: {}. Error: {}", exitCode, error);
+//                throw new RuntimeException("AI generation failed:\n" + error);
+//            }
 
 //            log.debug("Decoding Base64 image data");
 //            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 //            log.info("Successfully decoded image. Size: {} bytes", imageBytes.length);
+
+            log.info("Image generation completed...");
+            log.info("Trying to save the imageUrl into database...");
 
             // Store image in database using JPA repository
             ClothingDesign design = new ClothingDesign();
@@ -112,14 +115,14 @@ public class AIClothingService {
 
             return design;
 
-        } catch (InterruptedException e) {
-            log.error("Generation interrupted", e);
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Generation interrupted", e);
-        } catch (Exception e) {
-            log.error("Unexpected error during design generation", e);
-            throw e;
-        }
+//        } catch (InterruptedException e) {
+//            log.error("Generation interrupted", e);
+//            Thread.currentThread().interrupt();
+//            throw new RuntimeException("Generation interrupted", e);
+//        } catch (Exception e) {
+//            log.error("Unexpected error during design generation", e);
+//            throw e;
+//        }
     }
 
     //Apprach 2
