@@ -1,10 +1,8 @@
 package io.metaverse.fashion.studio.controller;
 
 import io.metaverse.fashion.studio.entity.ClothingDesign;
-import io.metaverse.fashion.studio.repository.ClothingDesignRepository;
 import io.metaverse.fashion.studio.service.AIClothingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,42 +12,29 @@ import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/designs")
-@CrossOrigin(origins = "*") // Allow all origins
+@CrossOrigin(origins = "*")
 public class DesignController {
 
     private final AIClothingService aiService;
 
     @Autowired
-    private ClothingDesignRepository clothingDesignRepository;
-
     public DesignController(AIClothingService aiService) {
         this.aiService = aiService;
     }
 
-    @PostMapping(value = "/{prompt}", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> generateDesign(
-            @PathVariable String prompt,
+    @PostMapping("/generate")
+    public ResponseEntity<?> generateDesign(
+            @RequestParam String prompt,
             @RequestParam(defaultValue = "casual") String style
     ) {
         try {
             String decodedPrompt = URLDecoder.decode(prompt, StandardCharsets.UTF_8);
-            byte[] imageBytes = aiService.generateClothingDesign(decodedPrompt, style);
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(imageBytes);
+            ClothingDesign design = aiService.generateClothingDesign(decodedPrompt, style);
+            return ResponseEntity.ok(design);
         } catch (IOException e) {
-            return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
+            return ResponseEntity.internalServerError().body("Error generating design: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(("Unexpected Error: " + e.getMessage()).getBytes());
+            return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
     }
-
-    // @GetMapping(value = "/design/{id}", produces = MediaType.IMAGE_PNG_VALUE)
-    // public ResponseEntity<byte[]> getDesign(@PathVariable Long id) {
-    //     try {
-    //         ClothingDesign design = clothingDesignRepository.findById(id)
-    //                 .orElseThrow(() -> new RuntimeException("Design not found"));
-    //         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(design.getImageData());
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
-    //     }
-    // }
 }

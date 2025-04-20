@@ -4,8 +4,9 @@ import time
 import logging
 from datetime import datetime
 from pathlib import Path
-from imagekitio import ImageKit
-from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
+import cloudinary
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
 
 # Configure logging
 logging.basicConfig(
@@ -18,14 +19,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger('FashionAI')
 
-# Initialize ImageKit
-imagekit = ImageKit(
-    public_key='public_kFHuvOaiMWhxtEDbGKOGTBw9E9g=',
-    private_key='private_bRat8BgH2PReRgIbtw8tp1pFze4=',
-    url_endpoint='https://ik.imagekit.io/sp7ub8zm6/sp7ub8zm6'
+# Configure Cloudinary (replace with your credentials)
+cloudinary.config(
+    cloud_name = "dnl1vldmo",
+    api_key = "852485781197181",
+    api_secret = "W-WgxhZjQIj1n0OwJKVhRCQ8Yz8"
 )
 
 def log_hardware_info():
+    # Log system resources and GPU availability
     import psutil
     import torch
 
@@ -88,22 +90,17 @@ def main():
         image.save(output_path)
         logger.info(f"Temporary image saved to: {output_path}")
 
-        # Upload to ImageKit
-        logger.info("Uploading to ImageKit...")
-        upload = imagekit.upload_file(
-            file=open(output_path, "rb"),
-            file_name=filename,
-            options=UploadFileRequestOptions(
-                folder="/fashion_designs/",
-                is_private_file=False
-            )
+        # Upload to Cloudinary
+        upload_result = cloudinary.uploader.upload(
+            output_path,
+            folder = "fashion_designs",
+            public_id = f"design_{timestamp}",
+            overwrite = True
         )
 
-        if upload.response_metadata.http_status_code != 200:
-            raise Exception("ImageKit upload failed")
-
-        image_url = upload.url
-        logger.info(f"Image uploaded to ImageKit: {image_url}")
+        # Get secure URL
+        image_url = upload_result['secure_url']
+        logger.info(f"Image uploaded to Cloudinary: {image_url}")
 
         # Clean up temporary file
         os.remove(output_path)

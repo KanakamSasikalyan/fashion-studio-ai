@@ -44,5 +44,10 @@ The primary goal of this project is to provide a platform where users can input 
 4. **Error Handling**:
    - Comprehensive logging and error handling ensure smooth execution and debugging.
 
+
+## Recent Error Log
+
+
+
 ## Author
 Kalyan

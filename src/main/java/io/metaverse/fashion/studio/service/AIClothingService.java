@@ -34,7 +34,7 @@ public class AIClothingService {
     }
 
     //Apprach1
-    public byte[] generateClothingDesign(String prompt, String style) throws IOException {
+    public ClothingDesign generateClothingDesign(String prompt, String style) throws IOException {
         // Ensure output directory exists
         Files.createDirectories(Paths.get(outputDir));
 
@@ -51,16 +51,29 @@ public class AIClothingService {
 
         Process process = pb.start();
 
+        String imageUrl = null;
+
         // Capture and log Python output in real-time
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {
 
             String line;
             while ((line = reader.readLine()) != null) {
+//                if (line.startsWith("ERROR")) {
+//                    log.error("Python: " + line);
+//                } else {
+//                    log.info("Python: " + line);
+//                }
+
                 if (line.startsWith("ERROR")) {
-                    log.error("Python: " + line);
+                    log.error("Python Error Output: {}", line);
                 } else {
-                    log.info("Python: " + line);
+                    log.info("Python Output: {}", line);
+
+                    // Check if the line is the image URL (the last line printed by Python)
+                    if (line.startsWith("http")) {
+                        imageUrl = line.trim();
+                    }
                 }
             }
         }
@@ -83,21 +96,21 @@ public class AIClothingService {
                 throw new RuntimeException("AI generation failed:\n" + error);
             }
 
-            log.debug("Decoding Base64 image data");
-            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-            log.info("Successfully decoded image. Size: {} bytes", imageBytes.length);
+//            log.debug("Decoding Base64 image data");
+//            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+//            log.info("Successfully decoded image. Size: {} bytes", imageBytes.length);
 
             // Store image in database using JPA repository
             ClothingDesign design = new ClothingDesign();
             design.setPrompt(prompt);
             design.setStyle(style);
-            design.setImageData(imageBytes);
+            design.setImageUrl(imageUrl);
 
             log.debug("Attempting to save design to database");
             ClothingDesign savedDesign = clothingDesignRepository.save(design);
             log.info("Design successfully saved to database with ID: {}", savedDesign.getId());
 
-            return imageBytes;
+            return design;
 
         } catch (InterruptedException e) {
             log.error("Generation interrupted", e);
