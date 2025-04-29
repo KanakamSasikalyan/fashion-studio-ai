@@ -71,8 +71,10 @@ def main():
         logger.info(f"Generating image (steps=25, size=512x512)...")
         gen_start = time.time()
 
+        tempPrompt = prompt + ", Note:strictly no human faces or gestures are to be included."
+
         image = pipe(
-            prompt,
+            tempPrompt,
             num_inference_steps=25,
             height=512,
             width=512
