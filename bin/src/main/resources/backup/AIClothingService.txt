@@ -1,0 +1,272 @@
+
+
+
+
+
+
+/*package io.metaverse.fashion.studio.service;
+
+import io.metaverse.fashion.studio.entity.ClothingDesign;
+import io.metaverse.fashion.studio.repository.ClothingDesignRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.stream.Collectors;
+
+@Service
+public class AIClothingService {
+
+    Logger log = LoggerFactory.getLogger(AIClothingService.class);
+
+    @Value("${ai.output.dir}")
+    private String outputDir;
+
+    private final String pythonScriptPath;
+    private final ClothingDesignRepository clothingDesignRepository;
+
+    @Autowired
+    public AIClothingService(@Value("${python.script.path}") String pythonScriptPath, ClothingDesignRepository clothingDesignRepository) {
+        this.pythonScriptPath = pythonScriptPath;
+        this.clothingDesignRepository = clothingDesignRepository;
+    }
+
+    //Apprach1
+    
+    public byte[] generateClothingDesign(String prompt, String style) throws IOException {
+        // Ensure output directory exists
+        Files.createDirectories(Paths.get(outputDir));
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "python",
+                pythonScriptPath,
+                "\"" + prompt + "\"",
+                style,
+                outputDir
+        );
+
+        // Redirect error stream to standard output
+        pb.redirectErrorStream(true);
+
+        Process process = pb.start();
+
+        // Capture and log Python output in real-time
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("ERROR")) {
+                    log.error("Python: " + line);
+                } else {
+                    log.info("Python: " + line);
+                }
+            }
+        }
+
+        try {
+
+            String base64Image = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            ).readLine();
+
+            if (process.waitFor() != 0) {
+                String error = new BufferedReader(
+                        new InputStreamReader(process.getErrorStream())
+                ).lines().collect(Collectors.joining("\n"));
+                throw new RuntimeException("AI generation failed:\n" + error);
+            }
+
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+            // Store image in database using JPA repository
+            ClothingDesign design = new ClothingDesign();
+            design.setPrompt(prompt);
+            design.setStyle(style);
+            design.setImageData(imageBytes);
+            clothingDesignRepository.save(design);
+
+            return imageBytes;
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Generation interrupted", e);
+        }
+    }*/
+
+
+    //Apprach 2
+    /*public byte[] generateClothingDesign(String prompt, String style) throws IOException {
+        log.info("Starting design generation for prompt: '{}' with style: '{}'", prompt, style);
+
+        // Ensure output directory exists
+        Files.createDirectories(Paths.get(outputDir));
+        log.debug("Output directory ensured at: {}", outputDir);
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "python",
+                pythonScriptPath,
+                "\"" + prompt + "\"",
+                style,
+                outputDir
+        );
+
+        // Redirect error stream to standard output
+        pb.redirectErrorStream(true);
+        log.debug("ProcessBuilder created with command: {}", pb.command());
+
+        Process process = pb.start();
+        log.debug("Python process started");
+
+        // Capture and log Python output in real-time
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("ERROR")) {
+                    log.error("Python Error Output: {}", line);
+                } else {
+                    log.info("Python Output: {}", line);
+                }
+            }
+        }
+
+        try {
+            log.debug("Attempting to read Base64 image from process output");
+            String base64Image = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            ).readLine();
+
+            log.debug("Waiting for Python process to complete");
+            int exitCode = process.waitFor();
+            log.info("Python process exited with code: {}", exitCode);
+
+            if (exitCode != 0) {
+                String error = new BufferedReader(
+                        new InputStreamReader(process.getErrorStream())
+                ).lines().collect(Collectors.joining("\n"));
+                log.error("AI generation failed with exit code: {}. Error: {}", exitCode, error);
+                throw new RuntimeException("AI generation failed:\n" + error);
+            }
+
+            log.debug("Decoding Base64 image data");
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            log.info("Successfully decoded image. Size: {} bytes", imageBytes.length);
+
+            // Store image in database using JPA repository
+            ClothingDesign design = new ClothingDesign();
+            design.setPrompt(prompt);
+            design.setStyle(style);
+            design.setImageData(imageBytes);
+
+            log.debug("Attempting to save design to database");
+            ClothingDesign savedDesign = clothingDesignRepository.save(design);
+            log.info("Design successfully saved to database with ID: {}", savedDesign.getId());
+
+            // Verify the saved entity
+            ClothingDesign retrieved = clothingDesignRepository.findById(savedDesign.getId()).orElse(null);
+            if (retrieved != null) {
+                log.debug("Database verification - Retrieved design ID: {}, Image exists: {}",
+                        retrieved.getId(),
+                        retrieved.getImageData() != null);
+            } else {
+                log.error("Failed to retrieve the just-saved design!");
+            }
+
+            return imageBytes;
+
+        } catch (InterruptedException e) {
+            log.error("Generation interrupted", e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Generation interrupted", e);
+        } catch (Exception e) {
+            log.error("Unexpected error during design generation", e);
+            throw e;
+        }
+    }*/
+
+
+    //Approach:3
+    /*public byte[] generateClothingDesign(String prompt, String style) throws IOException, InterruptedException {
+        log.info("Starting design generation for prompt: '{}' with style: '{}'", prompt, style);
+        Files.createDirectories(Paths.get(outputDir));
+        log.debug("Ensured output directory exists at: {}", outputDir);
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "python",
+                pythonScriptPath,
+                "\"" + prompt + "\"",
+                style,
+                outputDir
+        );
+        pb.redirectErrorStream(true);
+
+        log.debug("Executing Python script: {}", String.join(" ", pb.command()));
+        Process process = pb.start();
+        StringBuilder output = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+                log.debug("Python Output: {}", line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        log.info("Python process exited with code: {}", exitCode);
+
+        if (exitCode != 0) {
+            String errorMsg = "AI generation failed with code: " + exitCode + "\n" + output;
+            log.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+
+        String[] lines = output.toString().split("\n");
+        String imagePath = lines[lines.length - 1].trim();
+        log.info("Python script output image path: {}", imagePath);
+
+        try {
+            byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
+            log.debug("Read image bytes successfully. Size: {} bytes", imageBytes.length);
+
+            ClothingDesign design = new ClothingDesign();
+            design.setPrompt(prompt);
+            design.setStyle(style);
+            design.setImageData(imageBytes);
+
+            log.info("Attempting to save design to database. Prompt: {}, Style: {}, Image Size: {} bytes",
+                    design.getPrompt(), design.getStyle(), design.getImageData().length);
+
+            ClothingDesign savedDesign = clothingDesignRepository.save(design);
+            log.info("Successfully saved design with ID: {}", savedDesign.getId());
+
+            // Verify the saved entity
+            ClothingDesign retrieved = clothingDesignRepository.findById(savedDesign.getId()).orElse(null);
+            if (retrieved != null) {
+                log.debug("Database verification - Retrieved design ID: {}, Image size: {} bytes",
+                        retrieved.getId(),
+                        retrieved.getImageData() != null ? retrieved.getImageData().length : 0);
+            } else {
+                log.error("Failed to retrieve the just-saved design!");
+            }
+
+            return imageBytes;
+
+        } catch (Exception e) {
+            log.error("Error during database operation", e);
+            throw e;
+        }
+    }*/
+}

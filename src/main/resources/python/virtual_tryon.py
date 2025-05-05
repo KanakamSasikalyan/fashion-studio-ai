@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import sys
+import os
 
 def detect_upper_body(image_path):
     # Load the image
@@ -196,13 +197,26 @@ def overlay_cloth(person_image, upper_body_rect, cloth_image, cloth_mask):
     
     return result
 
+
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: python virtual_tryon.py <user_image_path> <cloth_image_path>")
+    if len(sys.argv) < 4:
+        print("Usage: python virtual_tryon.py <user_image_path> <cloth_image_path> <output_dir>")
         return
 
     user_image_path = sys.argv[1]
     cloth_image_path = sys.argv[2]
+    output_dir = sys.argv[3]
+
+    # Verify files exist
+    if not os.path.exists(user_image_path):
+        print(f"Error: User image not found at {user_image_path}")
+        return
+    if not os.path.exists(cloth_image_path):
+        print(f"Error: Cloth image not found at {cloth_image_path}")
+        return
+
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
 
     result = detect_upper_body(user_image_path)
     if result is None:
@@ -221,9 +235,9 @@ def main():
 
     result = overlay_cloth(person_image, upper_body_rect, cloth_image, cloth_mask)
 
-    output_path = "virtual_try_on_result.jpg"
+    output_path = os.path.join(output_dir, "virtual_try_on_result.jpg")
     cv2.imwrite(output_path, result)
-    print(f"Result saved to {output_path}")
+    print(output_path)  # This will be captured by Java
 
 if __name__ == "__main__":
     main()
