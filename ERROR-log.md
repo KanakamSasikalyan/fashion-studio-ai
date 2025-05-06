@@ -1,51 +1,10 @@
+react-dom.development.js:86 Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot
 
-2025-04-20T16:10:03.004+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:03,004 - FashionAI - INFO - === New Generation Request ===
-2025-04-20T16:10:03.005+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:03,005 - FashionAI - INFO - Prompt: 'Black Half-Sleeve T-Shirt' | Style: casual
-2025-04-20T16:10:15.733+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:15,705 - FashionAI - INFO - Python version: 3.13.0 (tags/v3.13.0:60403a5, Oct  7 2024, 09:38:07) [MSC v.1941 64 bit (AMD64)]
-2025-04-20T16:10:15.733+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:15,733 - FashionAI - INFO - System CPUs: 4
-2025-04-20T16:10:15.739+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:15,740 - FashionAI - INFO - Available RAM: 0.32 GB
-2025-04-20T16:10:15.741+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:15,741 - FashionAI - INFO - CUDA Available: False
-2025-04-20T16:10:15.741+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:15,741 - FashionAI - INFO - Loading Stable Diffusion pipeline...
-2025-04-20T16:10:47.383+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:
-2025-04-20T16:10:47.600+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: Loading pipeline components...:   0%|          | 0/6 [00:00<?, ?it/s]
-2025-04-20T16:10:48.286+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: Loading pipeline components...:  50%|#####     | 3/6 [00:00<00:00, 13.84it/s]
-2025-04-20T16:10:48.382+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: Loading pipeline components...:  83%|########3 | 5/6 [00:00<00:00,  4.90it/s]
-2025-04-20T16:10:48.382+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: Loading pipeline components...: 100%|##########| 6/6 [00:00<00:00,  6.01it/s]
-2025-04-20T16:10:48.383+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: You have disabled the safety checker for <class 'diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion.StableDiffusionPipeline'> by passing `safety_checker=None`. Ensure that you abide to the conditions of the Stable Diffusion license and do not expose unfiltered results in services or applications open to the public. Both the diffusers team and Hugging Face strongly recommend to keep the safety filter enabled in all public facing circumstances, disabling it only for use-cases that involve analyzing network behavior or auditing its results. For more information, please have a look at https://github.com/huggingface/diffusers/pull/254 .
-2025-04-20T16:10:48.392+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:48,392 - FashionAI - INFO - Model loaded in 32.65s
-2025-04-20T16:10:48.393+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:10:48,393 - FashionAI - INFO - Generating image (steps=25, size=512x512)...
-2025-04-20T16:10:50.404+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:
-2025-04-20T16:12:20.680+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:   0%|          | 0/25 [00:00<?, ?it/s]
-2025-04-20T16:12:49.044+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:   4%|4         | 1/25 [01:28<35:09, 87.88s/it]
-2025-04-20T16:13:13.049+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:   8%|8         | 2/25 [01:58<20:47, 54.26s/it]
-2025-04-20T16:13:38.191+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  12%|#2        | 3/25 [02:22<14:49, 40.45s/it]
-2025-04-20T16:14:02.159+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  16%|#6        | 4/25 [02:47<12:01, 34.38s/it]
-2025-04-20T16:14:30.205+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  20%|##        | 5/25 [03:11<10:13, 30.65s/it]
-2025-04-20T16:14:58.315+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  24%|##4       | 6/25 [03:39<09:25, 29.77s/it]
-2025-04-20T16:15:25.872+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  28%|##8       | 7/25 [04:07<08:46, 29.22s/it]
-2025-04-20T16:15:54.127+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  32%|###2      | 8/25 [04:35<08:07, 28.69s/it]
-2025-04-20T16:16:20.415+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  36%|###6      | 9/25 [05:03<07:34, 28.40s/it]
-2025-04-20T16:16:46.087+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  40%|####      | 10/25 [05:30<06:58, 27.90s/it]
-2025-04-20T16:17:12.105+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  44%|####4     | 11/25 [05:55<06:20, 27.20s/it]
-2025-04-20T16:17:37.698+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  48%|####8     | 12/25 [06:21<05:49, 26.86s/it]
-2025-04-20T16:18:04.435+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  52%|#####2    | 13/25 [06:47<05:17, 26.48s/it]
-2025-04-20T16:18:33.381+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  56%|#####6    | 14/25 [07:14<04:52, 26.56s/it]
-2025-04-20T16:19:00.108+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  60%|######    | 15/25 [07:42<04:32, 27.23s/it]
-2025-04-20T16:19:32.526+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  64%|######4   | 16/25 [08:09<04:04, 27.13s/it]
-2025-04-20T16:20:02.866+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  68%|######8   | 17/25 [08:41<03:49, 28.66s/it]
-2025-04-20T16:20:29.092+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  72%|#######2  | 18/25 [09:12<03:24, 29.22s/it]
-2025-04-20T16:20:56.016+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  76%|#######6  | 19/25 [09:38<02:49, 28.32s/it]
-2025-04-20T16:21:34.098+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  80%|########  | 20/25 [10:05<02:19, 27.90s/it]
-2025-04-20T16:22:11.653+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  84%|########4 | 21/25 [10:43<02:03, 30.78s/it]
-2025-04-20T16:22:43.567+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  88%|########8 | 22/25 [11:20<01:37, 32.64s/it]
-2025-04-20T16:23:09.754+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  92%|#########2| 23/25 [11:53<01:05, 32.77s/it]
-2025-04-20T16:23:37.838+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output:  96%|#########6| 24/25 [12:19<00:30, 30.80s/it]
-2025-04-20T16:23:40.333+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 100%|##########| 25/25 [12:47<00:00, 29.98s/it]
-2025-04-20T16:23:40.377+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 100%|##########| 25/25 [12:49<00:00, 30.78s/it]
-2025-04-20T16:26:32.573+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:26:31,495 - FashionAI - INFO - Generation completed in 942.88s
-2025-04-20T16:27:31.365+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:27:31,364 - FashionAI - INFO - Temporary image saved to: src/main/resources/static/generated\design_20250420_162638_48275.png
-2025-04-20T16:27:31.488+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:27:31,365 - FashionAI - INFO - Uploading to ImageKit...
-2025-04-20T16:27:46.602+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:27:46,034 - FashionAI - INFO - Image uploaded to ImageKit: https://ik.imagekit.io/sp7ub8zm6/fashion_designs/design_20250420_162638_48275_QMBdox3i_.png
-2025-04-20T16:27:46.858+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:27:46,035 - FashionAI - INFO - Temporary file removed: src/main/resources/static/generated\design_20250420_162638_48275.png
-2025-04-20T16:27:47.006+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: 2025-04-20 16:27:46,035 - FashionAI - INFO - Total execution time: 1063.03s
-2025-04-20T16:28:10.374+05:30  INFO 2264 --- [studio] [nio-8081-exec-7] i.m.f.studio.service.AIClothingService   : Python Output: https://ik.imagekit.io/sp7ub8zm6/fashion_designs/design_20250420_162638_48275_QMBdox3i_.png
+VirtualTryOn.jsx:29
+POST http://localhost:3000/api/virtual-tryon/try-on 500 (Internal Server Error)
+handleSubmit	@	VirtualTryOn.jsx:29
+VirtualTryOn.jsx:37 Error submitting images: Error: Request failed with status code 500
+at createError (createError.js:16:1)
+at settle (settle.js:17:1)
+at XMLHttpRequest.onloadend (xhr.js:54:1)
+handleSubmit	@	VirtualTryOn.jsx:37
