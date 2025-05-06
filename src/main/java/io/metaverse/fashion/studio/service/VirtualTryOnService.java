@@ -4,6 +4,8 @@ package io.metaverse.fashion.studio.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +16,8 @@ import java.util.UUID;
 @Service
 public class VirtualTryOnService {
 
+    private static final Logger logger = LoggerFactory.getLogger(VirtualTryOnService.class);
+
     @Value("${python.vtonscript.path}")
     private String pythonScriptPath;
 
@@ -21,6 +25,8 @@ public class VirtualTryOnService {
     private String outputDir;
 
     public String processImages(MultipartFile userImage, MultipartFile clothImage) throws IOException, InterruptedException {
+        logger.info("Starting processImages method");
+
         // Create output directory if it doesn't exist
         Path outputPath = Paths.get(outputDir);
         if (!Files.exists(outputPath)) {
@@ -30,6 +36,9 @@ public class VirtualTryOnService {
         // Save uploaded files temporarily
         String userImagePath = saveFile(userImage, "user");
         String clothImagePath = saveFile(clothImage, "cloth");
+
+        logger.info("User image saved at: {}", userImagePath);
+        logger.info("Cloth image saved at: {}", clothImagePath);
 
         // Run the Python script
         ProcessBuilder pb = new ProcessBuilder(
@@ -49,11 +58,13 @@ public class VirtualTryOnService {
             String line;
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
+                logger.info("Python script output: {}", line);
             }
         }
 
         int exitCode = process.waitFor();
         if (exitCode != 0) {
+            logger.error("Python script failed with exit code {}: {}", exitCode, output);
             throw new RuntimeException("Error running Python script: " + output);
         }
 
@@ -81,6 +92,7 @@ public class VirtualTryOnService {
         String fileName = prefix + "_" + UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = outputPath.resolve(fileName);
         file.transferTo(filePath);
+        logger.info("File saved: {}", filePath);
         return filePath.toAbsolutePath().toString();
     }
 }
