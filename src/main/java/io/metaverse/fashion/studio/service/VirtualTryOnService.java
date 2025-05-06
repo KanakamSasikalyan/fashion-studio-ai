@@ -27,8 +27,10 @@ public class VirtualTryOnService {
     public String processImages(MultipartFile userImage, MultipartFile clothImage) throws IOException, InterruptedException {
         logger.info("Starting processImages method");
 
+        String imageUrl = null;
+
         // Create output directory if it doesn't exist
-        Path outputPath = Paths.get(outputDir);
+        Path outputPath = getOutputPath();
         if (!Files.exists(outputPath)) {
             Files.createDirectories(outputPath);
         }
@@ -59,21 +61,40 @@ public class VirtualTryOnService {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
                 logger.info("Python script output: {}", line);
+
+                // Check for error patterns in output
+                if (line.startsWith("ERROR:") || line.contains("Exception") || line.contains("Error")) {
+                    logger.error("Python script error detected: {}", line);
+                    process.destroy();
+                    throw new RuntimeException("Python script error: " + line);
+                }
+
+                if (line.startsWith("http")) {
+                    imageUrl = line.trim();
+                }
             }
         }
 
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            logger.error("Python script failed with exit code {}: {}", exitCode, output);
-            throw new RuntimeException("Error running Python script: " + output);
+            throw new RuntimeException("Python script failed with exit code " + exitCode);
         }
 
-        // Clean up temporary files
-        Files.deleteIfExists(Paths.get(userImagePath));
-        Files.deleteIfExists(Paths.get(clothImagePath));
+        // Validate the output is a URL
+//        String result = output.toString().trim();
+//        if (!result.startsWith("http")) {
+//            throw new RuntimeException("Invalid output from Python script: " + result);
+//        }
 
-        // Return the result URL (last line of the output)
-        return output.toString().trim();
+        // Clean up temporary files
+        try {
+            Files.deleteIfExists(Paths.get(userImagePath));
+            Files.deleteIfExists(Paths.get(clothImagePath));
+        } catch (IOException e) {
+            logger.warn("Failed to delete temporary files: {}", e.getMessage());
+        }
+
+        return imageUrl;
     }
 
     private Path getOutputPath() {
