@@ -34,4 +34,9 @@ public class VirtualTryOnController {
             return ResponseEntity.internalServerError().body("Error processing request: " + e.getMessage());
         }
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        return ResponseEntity.internalServerError().body("An unexpected error occurred: " + e.getMessage());
+    }
 }
