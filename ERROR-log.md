@@ -1,16 +1,24 @@
+GET http://localhost:3000/Upper%20body%20not%20detected%20-%20using%20face-based%20estimationsrc/main/resources/static/vton/virtual_try_on_result.jpg 404 (Not Found)
 
-webpack compiled with 175 warnings
-(node:7820) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
-Proxy error: Could not proxy request /api/virtual-tryon/try-on from localhost:3000 to http://localhost:8081/.
-See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
 
-react-dom.development.js:86 Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot
 
-VirtualTryOn.jsx:29
-POST http://localhost:3000/api/virtual-tryon/try-on 500 (Internal Server Error)
-handleSubmit	@	VirtualTryOn.jsx:29
-VirtualTryOn.jsx:37 Error submitting images: Error: Request failed with status code 500
-at createError (createError.js:16:1)
-at settle (settle.js:17:1)
-at XMLHttpRequest.onloadend (xhr.js:54:1)
-handleSubmit	@	VirtualTryOn.jsx:37
+Starting processImages method
+2025-05-06T15:59:24.680+05:30  INFO 2032 --- [studio] [nio-8080-exec-1] i.m.f.s.service.VirtualTryOnService      : File saved: C:\Users\DELL\Downloads\GitHub-Workspace-Kalyan\fashion-studio-ai\src\main\resources\static\vton\user_d36d3edd-7c35-4647-8f18-0b04055ef620_yg.jpg
+2025-05-06T15:59:24.696+05:30  INFO 2032 --- [studio] [nio-8080-exec-1] i.m.f.s.service.VirtualTryOnService      : File saved: C:\Users\DELL\Downloads\GitHub-Workspace-Kalyan\fashion-studio-ai\src\main\resources\static\vton\cloth_29937c45-f412-4d9c-a29a-6dd3497f27c7_newtshirt-removebg-preview.png
+2025-05-06T15:59:24.696+05:30  INFO 2032 --- [studio] [nio-8080-exec-1] i.m.f.s.service.VirtualTryOnService      : User image saved at: C:\Users\DELL\Downloads\GitHub-Workspace-Kalyan\fashion-studio-ai\src\main\resources\static\vton\user_d36d3edd-7c35-4647-8f18-0b04055ef620_yg.jpg
+2025-05-06T15:59:24.697+05:30  INFO 2032 --- [studio] [nio-8080-exec-1] i.m.f.s.service.VirtualTryOnService      : Cloth image saved at: C:\Users\DELL\Downloads\GitHub-Workspace-Kalyan\fashion-studio-ai\src\main\resources\static\vton\cloth_29937c45-f412-4d9c-a29a-6dd3497f27c7_newtshirt-removebg-preview.png
+2025-05-06T15:59:39.501+05:30  INFO 2032 --- [studio] [nio-8080-exec-1] i.m.f.s.service.VirtualTryOnService      : Python script output: Upper body not detected - using face-based estimation
+2025-05-06T15:59:39.502+05:30  INFO 2032 --- [studio] [nio-8080-exec-1] i.m.f.s.service.VirtualTryOnService      : Python script output: src/main/resources/static/vton\virtual_try_on_result.jpg
+2025-05-06T15:59:39.742+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
+2025-05-06T15:59:39.748+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["Upper body not detected - using face-based estimation<EOL>src/main/resources/static/vton\virtual_try_on_ (truncated)..."]
+2025-05-06T15:59:39.813+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T15:59:40.150+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/Upper%20body%20not%20detected%20-%20using%20face-based%20estimationsrc/main/resources/static/vton/virtual_try_on_result.jpg", parameters={}
+2025-05-06T15:59:40.165+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2025-05-06T15:59:40.181+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2025-05-06T15:59:40.192+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource Upper%20body%20not%20detected%20-%20using%20face-based%20estimationsrc/main/resources/static/vton/virtual_try_on_result.jpg.]
+2025-05-06T15:59:40.193+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2025-05-06T15:59:40.224+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for GET "/error", parameters={}
+2025-05-06T15:59:40.229+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
+2025-05-06T15:59:40.293+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json, application/yaml]
+2025-05-06T15:59:40.302+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Tue May 06 15:59:40 IST 2025, status=404, error=Not Found, path=/Upper%20body%20not%20det (truncated)...]
+2025-05-06T15:59:40.573+05:30 DEBUG 2032 --- [studio] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 404
