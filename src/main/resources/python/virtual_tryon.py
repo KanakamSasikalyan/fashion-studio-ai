@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import sys
 import os
+from imagekitio import ImageKit
 
 def detect_upper_body(image_path):
     # Load the image
@@ -197,7 +198,30 @@ def overlay_cloth(person_image, upper_body_rect, cloth_image, cloth_mask):
     
     return result
 
+# Initialize ImageKit
+imagekit = ImageKit(
+    public_key='public_kFHuvOaiMWhxtEDbGKOGTBw9E9g=',
+    private_key='private_bRat8BgH2PReRgIbtw8tp1pFze4=',
+    url_endpoint='https://ik.imagekit.io/sp7ub8zm6/sp7ub8zm6'
+)
 
+# Function to upload image to ImageKit
+def upload_to_imagekit(file_path):
+    upload_response = imagekit.upload_file(
+        file=open(file_path, 'rb'),
+        file_name=os.path.basename(file_path),
+        options={
+            "folder": "/virtual_tryon_results/",
+            "is_private_file": False
+        }
+    )
+
+    if 'url' in upload_response:
+        return upload_response['url']
+    else:
+        raise Exception(f"Image upload failed: {upload_response}")
+
+# Modify the main function to upload the result image and return the URL
 def main():
     if len(sys.argv) < 4:
         print("Usage: python virtual_tryon.py <user_image_path> <cloth_image_path> <output_dir>")
@@ -237,7 +261,13 @@ def main():
 
     output_path = os.path.join(output_dir, "virtual_try_on_result.jpg")
     cv2.imwrite(output_path, result)
-    print(output_path)  # This will be captured by Java
+
+    # Upload the result image to ImageKit
+    try:
+        image_url = upload_to_imagekit(output_path)
+        print(image_url)  # This will be captured by Java
+    except Exception as e:
+        print(f"Error uploading image: {e}")
 
 if __name__ == "__main__":
     main()
