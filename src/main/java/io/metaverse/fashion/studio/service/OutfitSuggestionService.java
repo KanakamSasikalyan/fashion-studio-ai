@@ -61,9 +61,12 @@ public class OutfitSuggestionService {
 
             return response.path("outfitSuggestion").asText();
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Script execution interrupted", e);
+        } catch (IOException | InterruptedException e) {
+            logger.error("Error executing Python script: {}", e.getMessage(), e);
+            throw new RuntimeException("Python script execution failed", e);
+        } catch (RuntimeException e) {
+            logger.error("Python script returned an error: {}", e.getMessage(), e);
+            throw e;
         }
     }
 

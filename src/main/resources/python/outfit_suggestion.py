@@ -28,11 +28,13 @@ DATA_PATH = os.path.join(BASE_DIR, 'unique_outfit_data_large.csv')
 def train_model():
     """Train model with memory-efficient techniques"""
     try:
-        logger.info(f"Loading data from {DATA_PATH}")
+        # Limit dataset size to 1000 rows
+        logger.info(f"Loading and limiting data to 1000 rows from: {DATA_PATH}")
+        data = pd.read_csv(DATA_PATH, nrows=1000)
+        logger.info(f"Loaded {len(data)} rows for processing")
 
-        # Process data in chunks
-        chunksize = 10000
-        text_chunks = pd.read_csv(DATA_PATH, chunksize=chunksize, usecols=['occasion_text', 'outfit'])
+        # Process the limited dataset
+        text_chunks = [data]
 
         # Initialize vectorizer (memory-efficient)
         vectorizer = HashingVectorizer(
@@ -54,8 +56,7 @@ def train_model():
         # Get all unique classes first
         logger.info("Identifying unique classes...")
         all_classes = set()
-        for chunk in pd.read_csv(DATA_PATH, chunksize=chunksize, usecols=['outfit']):
-            all_classes.update(chunk['outfit'].unique())
+        all_classes.update(data['outfit'].unique())
         all_classes = sorted(all_classes)
 
         # Partial fit on chunks
@@ -71,6 +72,9 @@ def train_model():
         joblib.dump(vectorizer, VECTORIZER_PATH)
         logger.info(f"Model training completed successfully")
 
+    except MemoryError as e:
+        logger.error(f"MemoryError encountered: {str(e)}")
+        raise
     except Exception as e:
         logger.error(f"Training failed: {str(e)}")
         raise
