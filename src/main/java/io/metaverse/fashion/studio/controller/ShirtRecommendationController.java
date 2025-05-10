@@ -38,6 +38,11 @@ public class ShirtRecommendationController {
                     image1, platform1, price1, description1,
                     image2, platform2, price2, description2
             );
+
+            if (response.containsKey("recommendations")) {
+                response.put("reason", "The comparison was based on platform, price, material, and description quality.");
+            }
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(

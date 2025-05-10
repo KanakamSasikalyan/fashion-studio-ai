@@ -97,6 +97,8 @@ def main():
             weights['description'] * shirts_df['description_score']
         )
 
+        shirts_df['reason'] = shirts_df.apply(lambda row: f"Chosen for its {row['platform']} platform score, price normalization, material quality, and description length.", axis=1)
+
         recommendations = shirts_df.sort_values(by="score", ascending=False)
         print(json.dumps({
             'status': 'success',
@@ -130,51 +132,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main()
-
-'''if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--image1")
-    parser.add_argument("--platform1")
-    parser.add_argument("--price1")
-    parser.add_argument("--description1")
-    parser.add_argument("--image2")
-    parser.add_argument("--platform2")
-    parser.add_argument("--price2")
-    parser.add_argument("--description2")
-    parser.add_argument("--platform_weight", type=float)
-    parser.add_argument("--price_weight", type=float)
-    parser.add_argument("--color_weight", type=float)
-    parser.add_argument("--material_weight", type=float)
-    parser.add_argument("--description_weight", type=float)
-    args = parser.parse_args()
-
-    weights = {
-        'platform': args.platform_weight,
-        'price': args.price_weight,
-        'color': args.color_weight,
-        'material': args.material_weight,
-        'description': args.description_weight
-    }
-
-    try:
-        shirts_df = pd.DataFrame([
-            build_shirt_features("shirt_1", args.image1, args.platform1, args.price1, args.description1),
-            build_shirt_features("shirt_2", args.image2, args.platform2, args.price2, args.description2)
-        ])
-
-        shirts_df['score'] = (
-            weights['platform'] * shirts_df['platform_score'] +
-            weights['price'] * shirts_df['price_norm'] +
-            weights['material'] * shirts_df['material_score'] +
-            weights['description'] * shirts_df['description_score']
-        )
-
-        recommendations = shirts_df.sort_values(by="score", ascending=False)
-        print(json.dumps({
-            'status': 'success',
-            'recommendations': recommendations.to_dict(orient='records'),
-            'weights_used': weights
-        }))
-    except Exception as e:
-        print(json.dumps({'status': 'error', 'message': str(e), 'traceback': traceback.format_exc()}))
-        sys.exit(1)'''
