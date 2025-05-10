@@ -48,3 +48,4 @@ config.json
 
 backend-springboot/src/main/resources/python/models/*
 
+/bin/
