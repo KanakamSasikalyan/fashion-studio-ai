@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/shirts")
@@ -40,7 +41,17 @@ public class ShirtRecommendationController {
             );
 
             if (response.containsKey("recommendations")) {
-                response.put("reason", "The comparison was based on platform, price, material, and description quality.");
+                List<Map<String, Object>> recommendations = (List<Map<String, Object>>) response.get("recommendations");
+                if (!recommendations.isEmpty()) {
+                    response.put("recommendation", recommendations.get(0)); // Keep only the first result
+                    response.remove("recommendations");
+                }
+            }
+
+            if (response.containsKey("recommendation")) {
+                Map<String, Object> recommendation = (Map<String, Object>) response.get("recommendation");
+                recommendation.put("reason", "This shirt is recommended based on its platform score, price, material quality, and description relevance.");
+                recommendation.put("description", "The shirt offers a balance of quality and affordability, making it suitable for the specified occasion.");
             }
 
             return ResponseEntity.ok(response);
