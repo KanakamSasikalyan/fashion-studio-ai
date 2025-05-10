@@ -8,11 +8,11 @@ import os
 import logging
 import numpy as np
 
-# Configure logging
+# Configure logging to use stderr
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[logging.StreamHandler(sys.stderr)]  # Changed to stderr
 )
 logger = logging.getLogger(__name__)
 
@@ -28,38 +28,30 @@ DATA_PATH = os.path.join(BASE_DIR, 'unique_outfit_data_large.csv')
 def train_model():
     """Train model with memory-efficient techniques"""
     try:
-        # Limit dataset size to 1000 rows
         logger.info(f"Loading and limiting data to 1000 rows from: {DATA_PATH}")
         data = pd.read_csv(DATA_PATH, nrows=1000)
         logger.info(f"Loaded {len(data)} rows for processing")
 
-        # Process the limited dataset
         text_chunks = [data]
 
-        # Initialize vectorizer (memory-efficient)
         vectorizer = HashingVectorizer(
-            n_features=2**18,  # Fixed size feature space
+            n_features=2**18,
             alternate_sign=False,
             ngram_range=(1, 2),
             stop_words='english'
         )
 
-        # Initialize model
         model = SGDClassifier(
-            loss='log_loss',  # logistic regression
+            loss='log_loss',
             penalty='l2',
             max_iter=1000,
             tol=1e-4,
             n_jobs=-1
         )
 
-        # Get all unique classes first
         logger.info("Identifying unique classes...")
-        all_classes = set()
-        all_classes.update(data['outfit'].unique())
-        all_classes = sorted(all_classes)
+        all_classes = sorted(data['outfit'].unique())
 
-        # Partial fit on chunks
         logger.info("Starting incremental training...")
         for i, chunk in enumerate(text_chunks):
             logger.info(f"Processing chunk {i+1}")
@@ -67,7 +59,6 @@ def train_model():
             y = chunk['outfit']
             model.partial_fit(X, y, classes=all_classes)
 
-        # Save model and vectorizer
         joblib.dump(model, MODEL_PATH)
         joblib.dump(vectorizer, VECTORIZER_PATH)
         logger.info(f"Model training completed successfully")
@@ -121,7 +112,8 @@ def main():
         input_text = " ".join(sys.argv[1:])
         result = predict_outfit(input_text)
 
-        print(json.dumps(result))
+        # Ensure only JSON is printed to stdout
+        sys.stdout.write(json.dumps(result) + "\n")
         sys.stdout.flush()
 
     except Exception as e:
@@ -133,7 +125,7 @@ def main():
                 "script_location": BASE_DIR
             }
         }
-        print(json.dumps(error_result))
+        sys.stdout.write(json.dumps(error_result) + "\n")
         sys.stdout.flush()
         sys.exit(1)
 
