@@ -1,94 +1,102 @@
 import sys
 import pandas as pd
 import joblib
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.linear_model import SGDClassifier
 import json
 import os
 import logging
+import numpy as np
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
 logger = logging.getLogger(__name__)
 
-def get_base_path():
-    """Get the base path of the script, handling both development and packaged execution"""
-    try:
-        # When running as a script
-        base_path = os.path.dirname(os.path.abspath(__file__))
-    except NameError:
-        # When running in some environments where __file__ isn't defined
-        base_path = os.getcwd()
-    return base_path
-
-# Path configuration
-BASE_DIR = get_base_path()
+# Configuration
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, 'model')
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 MODEL_PATH = os.path.join(MODEL_DIR, 'outfit_model.pkl')
 VECTORIZER_PATH = os.path.join(MODEL_DIR, 'vectorizer.pkl')
-DATA_PATH = os.path.join(BASE_DIR, 'src', 'main', 'resources', 'data', 'unique_outfit_data_large.csv')
+DATA_PATH = os.path.join(BASE_DIR, 'unique_outfit_data_large.csv')
 
 def train_model():
-    """Train and save the outfit suggestion model"""
+    """Train model with memory-efficient techniques"""
     try:
-        logger.info(f"Looking for data at: {DATA_PATH}")
+        logger.info(f"Loading data from {DATA_PATH}")
 
-        if not os.path.exists(DATA_PATH):
-            raise FileNotFoundError(f"Data file not found at: {DATA_PATH}")
+        # Process data in chunks
+        chunksize = 10000
+        text_chunks = pd.read_csv(DATA_PATH, chunksize=chunksize, usecols=['occasion_text', 'outfit'])
 
-        logger.info("Training the model...")
+        # Initialize vectorizer (memory-efficient)
+        vectorizer = HashingVectorizer(
+            n_features=2**18,  # Fixed size feature space
+            alternate_sign=False,
+            ngram_range=(1, 2),
+            stop_words='english'
+        )
 
-        # Load and prepare data
-        df = pd.read_csv(DATA_PATH)
-        vectorizer = TfidfVectorizer()
-        X = vectorizer.fit_transform(df['occasion_text'])
-        y = df['outfit']
+        # Initialize model
+        model = SGDClassifier(
+            loss='log_loss',  # logistic regression
+            penalty='l2',
+            max_iter=1000,
+            tol=1e-4,
+            n_jobs=-1
+        )
 
-        # Train model
-        model = LogisticRegression(max_iter=1000)
-        model.fit(X, y)
+        # Get all unique classes first
+        logger.info("Identifying unique classes...")
+        all_classes = set()
+        for chunk in pd.read_csv(DATA_PATH, chunksize=chunksize, usecols=['outfit']):
+            all_classes.update(chunk['outfit'].unique())
+        all_classes = sorted(all_classes)
 
-        # Save artifacts
+        # Partial fit on chunks
+        logger.info("Starting incremental training...")
+        for i, chunk in enumerate(text_chunks):
+            logger.info(f"Processing chunk {i+1}")
+            X = vectorizer.transform(chunk['occasion_text'])
+            y = chunk['outfit']
+            model.partial_fit(X, y, classes=all_classes)
+
+        # Save model and vectorizer
         joblib.dump(model, MODEL_PATH)
         joblib.dump(vectorizer, VECTORIZER_PATH)
-        logger.info(f"Model saved to: {MODEL_PATH}")
+        logger.info(f"Model training completed successfully")
 
     except Exception as e:
-        logger.error(f"Error training model: {str(e)}")
+        logger.error(f"Training failed: {str(e)}")
         raise
 
 def predict_outfit(prompt):
-    """Predict outfit based on occasion text"""
+    """Make prediction with loaded model"""
     try:
-        # Verify model files exist
-        if not os.path.exists(MODEL_PATH) or not os.path.exists(VECTORIZER_PATH):
-            raise FileNotFoundError("Model files not found. Please train the model first.")
-
-        # Load model and vectorizer
         model = joblib.load(MODEL_PATH)
         vectorizer = joblib.load(VECTORIZER_PATH)
 
-        # Transform input and predict
-        vec = vectorizer.transform([prompt])
-        prediction = model.predict(vec)[0]
+        X = vectorizer.transform([prompt])
+        prediction = model.predict(X)[0]
 
         return {
             "status": "success",
             "outfitSuggestion": prediction,
             "message": "Prediction successful"
         }
-
     except Exception as e:
-        logger.error(f"Prediction error: {str(e)}")
+        logger.error(f"Prediction failed: {str(e)}")
         return {
             "status": "error",
             "message": str(e),
             "debug": {
                 "model_path": MODEL_PATH,
-                "vectorizer_path": VECTORIZER_PATH,
-                "data_path": DATA_PATH
+                "vectorizer_path": VECTORIZER_PATH
             }
         }
 
@@ -99,20 +107,17 @@ def check_and_train_model():
         train_model()
 
 def main():
-    """Main entry point for command line execution"""
+    """Main entry point"""
     try:
-        # Initialize model
         check_and_train_model()
 
-        # Get input from command line arguments
         if len(sys.argv) < 2:
-            raise ValueError("Please provide an occasion description as input")
+            raise ValueError("Please provide an occasion description")
 
         input_text = " ".join(sys.argv[1:])
         result = predict_outfit(input_text)
 
-        # Output JSON for the Java service to read
-        print(json.dumps(result, indent=2))
+        print(json.dumps(result))
         sys.stdout.flush()
 
     except Exception as e:
@@ -121,11 +126,10 @@ def main():
             "message": str(e),
             "debug": {
                 "current_directory": os.getcwd(),
-                "script_location": get_base_path(),
-                "data_path": DATA_PATH
+                "script_location": BASE_DIR
             }
         }
-        print(json.dumps(error_result, indent=2))
+        print(json.dumps(error_result))
         sys.stdout.flush()
         sys.exit(1)
 

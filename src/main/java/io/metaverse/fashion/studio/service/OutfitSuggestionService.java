@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class OutfitSuggestionService {
-
     private static final Logger logger = LoggerFactory.getLogger(OutfitSuggestionService.class);
 
     @Value("${python.outfitscript.path}")
@@ -33,50 +32,37 @@ public class OutfitSuggestionService {
                     occasion
             );
 
-            // Redirect error stream to output stream to capture all logs
+            // Combine stdout and stderr
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
 
-            // Read the combined output stream (stdout + stderr)
+            // Read output
             String processOutput = readStream(process.getInputStream());
-
-            // Log the Python output
             logger.debug("Python script output:\n{}", processOutput);
 
-            // Wait for the process to complete with timeout
-            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
-            if (!finished) {
+            // Wait with timeout
+            if (!process.waitFor(1, TimeUnit.MINUTES)) {
                 process.destroy();
-                throw new RuntimeException("Python script execution timed out");
+                throw new RuntimeException("Python script timed out");
             }
 
-            if (processOutput == null || processOutput.isEmpty()) {
-                throw new RuntimeException("Python script returned no output");
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("Python script failed: " + processOutput);
             }
 
-            // Parse JSON
-            JsonNode rootNode;
-            try {
-                rootNode = objectMapper.readTree(processOutput);
-            } catch (Exception e) {
-                logger.error("Failed to parse Python script output: {}", processOutput);
-                throw new RuntimeException("Invalid JSON output from Python script", e);
+            // Parse response
+            JsonNode response = objectMapper.readTree(processOutput);
+            if (!response.path("status").asText().equals("success")) {
+                throw new RuntimeException(
+                        "Prediction failed: " + response.path("message").asText()
+                );
             }
 
-            if ("error".equals(rootNode.path("status").asText())) {
-                String errorMessage = rootNode.path("message").asText();
-                logger.error("Python script reported error: {}", errorMessage);
-                throw new RuntimeException("Python error: " + errorMessage);
-            }
-
-            String suggestion = rootNode.path("outfitSuggestion").asText();
-            logger.info("Outfit suggestion received: {}", suggestion);
-            return suggestion;
+            return response.path("outfitSuggestion").asText();
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error("Python script execution interrupted", e);
             throw new RuntimeException("Script execution interrupted", e);
         }
     }
@@ -86,9 +72,9 @@ public class OutfitSuggestionService {
             StringBuilder builder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                builder.append(line).append("\n");
+                builder.append(line);
             }
-            return builder.toString().trim();
+            return builder.toString();
         }
     }
 }
