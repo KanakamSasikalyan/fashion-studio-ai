@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import spacy
 import pandas as pd
+import traceback
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -111,5 +112,5 @@ if __name__ == "__main__":
             'weights_used': weights
         }))
     except Exception as e:
-        print(json.dumps({'status': 'error', 'message': str(e)}))
+        print(json.dumps({'status': 'error', 'message': str(e), 'traceback': traceback.format_exc()}))
         sys.exit(1)

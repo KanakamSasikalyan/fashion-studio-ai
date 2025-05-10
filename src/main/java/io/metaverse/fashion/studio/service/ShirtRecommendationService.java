@@ -61,16 +61,21 @@ public class ShirtRecommendationService {
         Process process = processBuilder.start();
 
         StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        StringBuilder errorOutput = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line);
+                output.append(line).append("\n");
+            }
+            while ((line = errorReader.readLine()) != null) {
+                errorOutput.append(line).append("\n");
             }
         }
 
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            throw new RuntimeException("Python script failed with exit code: " + exitCode);
+            throw new RuntimeException("Python script failed with exit code: " + exitCode + "\nError Output: " + errorOutput.toString());
         }
 
         return new ObjectMapper().readValue(output.toString(), Map.class);
