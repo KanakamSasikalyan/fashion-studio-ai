@@ -28,7 +28,7 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 
 MODEL_PATH = os.path.join(MODEL_DIR, 'outfit_model.pkl')
 VECTORIZER_PATH = os.path.join(MODEL_DIR, 'vectorizer.pkl')
-DATA_PATH = os.path.join(BASE_DIR, 'src\\main\\resources\\data', 'unique_outfit_data_large.csv')
+DATA_PATH = os.path.join(BASE_DIR, 'src', 'main', 'resources', 'data', 'unique_outfit_data_large.csv')
 
 def train_model():
     """Train and save the outfit suggestion model"""
