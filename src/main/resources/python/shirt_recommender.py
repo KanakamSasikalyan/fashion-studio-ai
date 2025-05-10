@@ -67,7 +67,71 @@ def build_shirt_features(id, image_path, platform, price, description):
     })
     return features
 
+def main():
+    try:
+        shirts = []
+
+        if args.image1:
+            shirts.append(build_shirt_features("shirt_1", args.image1, args.platform1, args.price1, args.description1))
+
+        if args.image2:
+            shirts.append(build_shirt_features("shirt_2", args.image2, args.platform2, args.price2, args.description2))
+
+        if not shirts:
+            raise ValueError("At least one shirt must be provided")
+
+        shirts_df = pd.DataFrame(shirts)
+
+        weights = {
+            'platform': args.platform_weight,
+            'price': args.price_weight,
+            'color': args.color_weight,
+            'material': args.material_weight,
+            'description': args.description_weight
+        }
+
+        shirts_df['score'] = (
+            weights['platform'] * shirts_df['platform_score'] +
+            weights['price'] * shirts_df['price_norm'] +
+            weights['material'] * shirts_df['material_score'] +
+            weights['description'] * shirts_df['description_score']
+        )
+
+        recommendations = shirts_df.sort_values(by="score", ascending=False)
+        print(json.dumps({
+            'status': 'success',
+            'recommendations': recommendations.to_dict(orient='records'),
+            'weights_used': weights
+        }))
+    except Exception as e:
+        error_info = {
+            'status': 'error',
+            'message': str(e),
+            'traceback': traceback.format_exc()
+        }
+        print(json.dumps(error_info))
+        sys.exit(1)
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--image1", required=False)
+    parser.add_argument("--platform1", required=False, default="Unknown")
+    parser.add_argument("--price1", required=False, default="1000.0")
+    parser.add_argument("--description1", required=False, default="")
+    parser.add_argument("--image2", required=False)
+    parser.add_argument("--platform2", required=False, default="Unknown")
+    parser.add_argument("--price2", required=False, default="1000.0")
+    parser.add_argument("--description2", required=False, default="")
+    parser.add_argument("--platform_weight", type=float, default=0.2)
+    parser.add_argument("--price_weight", type=float, default=0.3)
+    parser.add_argument("--color_weight", type=float, default=0.2)
+    parser.add_argument("--material_weight", type=float, default=0.2)
+    parser.add_argument("--description_weight", type=float, default=0.1)
+    args = parser.parse_args()
+
+    main()
+
+'''if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image1")
     parser.add_argument("--platform1")
@@ -113,4 +177,4 @@ if __name__ == "__main__":
         }))
     except Exception as e:
         print(json.dumps({'status': 'error', 'message': str(e), 'traceback': traceback.format_exc()}))
-        sys.exit(1)
+        sys.exit(1)'''

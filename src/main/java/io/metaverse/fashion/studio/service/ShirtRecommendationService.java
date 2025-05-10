@@ -30,24 +30,38 @@ public class ShirtRecommendationService {
             MultipartFile image1, String platform1, Double price1, String description1,
             MultipartFile image2, String platform2, Double price2, String description2) throws IOException, InterruptedException {
 
-        String image1Path = saveImage("shirt1", image1);
-        String image2Path = saveImage("shirt2", image2);
+        // Validate at least one image is provided
+        if (image1 == null && image2 == null) {
+            throw new IllegalArgumentException("At least one shirt image must be provided");
+        }
 
+        // Save images and build command
         List<String> command = new ArrayList<>();
         command.add(pythonExecutable);
         command.add(pythonScriptPath);
 
+        if (image1 != null) {
+            String image1Path = saveImage("shirt1", image1);
+            command.addAll(List.of(
+                    "--image1", image1Path,
+                    "--platform1", platform1 != null ? platform1 : "Unknown",
+                    "--price1", price1 != null ? String.valueOf(price1) : "1000.0",
+                    "--description1", description1 != null ? description1 : ""
+            ));
+        }
+
+        if (image2 != null) {
+            String image2Path = saveImage("shirt2", image2);
+            command.addAll(List.of(
+                    "--image2", image2Path,
+                    "--platform2", platform2 != null ? platform2 : "Unknown",
+                    "--price2", price2 != null ? String.valueOf(price2) : "1000.0",
+                    "--description2", description2 != null ? description2 : ""
+            ));
+        }
+
+        // Add default weights
         command.addAll(List.of(
-                "--image1", image1Path,
-                "--platform1", platform1 != null ? platform1 : "Unknown",
-                "--price1", price1 != null ? String.valueOf(price1) : "1000.0",
-                "--description1", description1 != null ? description1 : "",
-
-                "--image2", image2Path,
-                "--platform2", platform2 != null ? platform2 : "Unknown",
-                "--price2", price2 != null ? String.valueOf(price2) : "1000.0",
-                "--description2", description2 != null ? description2 : "",
-
                 "--platform_weight", "0.2",
                 "--price_weight", "0.3",
                 "--color_weight", "0.2",
@@ -61,21 +75,16 @@ public class ShirtRecommendationService {
         Process process = processBuilder.start();
 
         StringBuilder output = new StringBuilder();
-        StringBuilder errorOutput = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
-            }
-            while ((line = errorReader.readLine()) != null) {
-                errorOutput.append(line).append("\n");
             }
         }
 
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            throw new RuntimeException("Python script failed with exit code: " + exitCode + "\nError Output: " + errorOutput.toString());
+            throw new RuntimeException("Python script failed with exit code: " + exitCode + "\nOutput: " + output.toString());
         }
 
         return new ObjectMapper().readValue(output.toString(), Map.class);
