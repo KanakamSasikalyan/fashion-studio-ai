@@ -97,12 +97,12 @@ def main():
             weights['description'] * shirts_df['description_score']
         )
 
-        shirts_df['reason'] = shirts_df.apply(lambda row: f"Chosen for its {row['platform']} platform score, price normalization, material quality, and description length.", axis=1)
+        top_recommendation = shirts_df.sort_values(by="score", ascending=False).iloc[0].to_dict()
+        top_recommendation['reason'] = f"Chosen for its {top_recommendation['platform']} platform score, price normalization, material quality, and description length."
 
-        recommendations = shirts_df.sort_values(by="score", ascending=False)
         print(json.dumps({
             'status': 'success',
-            'recommendations': recommendations.to_dict(orient='records'),
+            'recommendation': top_recommendation,
             'weights_used': weights
         }))
     except Exception as e:

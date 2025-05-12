@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Virtual Try-On</title>
+    <style>
+        #videoCanvas {
+            border: 1px solid black;
+            margin: 20px;
+            max-width: 100%;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Virtual Try-On</h1>
+
+    <div>
+        <input type="file" id="clothImage" accept="image/*">
+        <button id="startBtn">Start Virtual Try-On</button>
+        <button id="stopBtn" disabled>Stop</button>
+    </div>
+
+    <canvas id="videoCanvas" width="640" height="480"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const clothImageInput = document.getElementById('clothImage');
+    let websocket;
+    let tryOnPort = 8765; // Default port
+
+    startBtn.addEventListener('click', async () => {
+        const file = clothImageInput.files[0];
+        if (!file) {
+            alert('Please select a cloth image first');
+            return;
+        }
+
+        try {
+            // 1. Upload image to Java backend
+            const formData = new FormData();
+            formData.append('clothImage', file);
+
+            const response = await fetch('/api/virtual-try-on/start', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                tryOnPort = result.port || 8765;
+                connectWebSocket();
+            } else {
+                throw new Error(result.error || 'Failed to start virtual try-on');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+        }
+    });
+
+    function connectWebSocket() {
+        websocket = new WebSocket(`ws://localhost:${tryOnPort}`);
+
+        websocket.onopen = () => {
+            console.log('Connected to WebSocket server');
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            clothImageInput.disabled = true;
+        };
+
+        websocket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'frame') {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+                img.src = 'data:image/jpeg;base64,' + data.image;
+            } else if (data.error) {
+                console.error('Server error:', data.error);
+            }
+        };
+
+        websocket.onclose = () => {
+            console.log('Disconnected from WebSocket server');
+            resetUI();
+        };
+
+        websocket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            resetUI();
+        };
+    }
+
+    stopBtn.addEventListener('click', () => {
+        if (websocket) {
+            websocket.send('stop');
+            websocket.close();
+        }
+        fetch('/api/virtual-try-on/stop', { method: 'POST' });
+        resetUI();
+    });
+
+    function resetUI() {
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        clothImageInput.disabled = false;
+    }
+</script>
+</body>
+</html>

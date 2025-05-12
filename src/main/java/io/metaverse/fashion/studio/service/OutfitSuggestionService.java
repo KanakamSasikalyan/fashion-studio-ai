@@ -22,26 +22,23 @@ public class OutfitSuggestionService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public String getOutfitSuggestion(String occasion) throws IOException {
+    public String getOutfitSuggestion(String occasion, String gender) throws IOException {
         try {
-            logger.info("Executing Python script for occasion: {}", occasion);
+            logger.info("Executing Python script for occasion: {} and gender: {}", occasion, gender);
 
             ProcessBuilder pb = new ProcessBuilder(
                     "python",
                     pythonScriptPath,
-                    occasion
+                    occasion,
+                    gender
             );
 
-            // Combine stdout and stderr
             pb.redirectErrorStream(true);
-
             Process process = pb.start();
 
-            // Read output
             String processOutput = readStream(process.getInputStream());
             logger.debug("Python script output:\n{}", processOutput);
 
-            // Wait with timeout
             if (!process.waitFor(1, TimeUnit.MINUTES)) {
                 process.destroy();
                 throw new RuntimeException("Python script timed out");
@@ -51,7 +48,6 @@ public class OutfitSuggestionService {
                 throw new RuntimeException("Python script failed: " + processOutput);
             }
 
-            // Parse response
             JsonNode response = objectMapper.readTree(processOutput);
             if (!response.path("status").asText().equals("success")) {
                 throw new RuntimeException(
@@ -64,9 +60,6 @@ public class OutfitSuggestionService {
         } catch (IOException | InterruptedException e) {
             logger.error("Error executing Python script: {}", e.getMessage(), e);
             throw new RuntimeException("Python script execution failed", e);
-        } catch (RuntimeException e) {
-            logger.error("Python script returned an error: {}", e.getMessage(), e);
-            throw e;
         }
     }
 

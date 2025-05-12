@@ -20,7 +20,9 @@ public class OutfitSuggestionController {
     }
 
     @GetMapping("/suggest")
-    public String suggestOutfit(@RequestParam String occasion) throws IOException {
-        return outfitSuggestionService.getOutfitSuggestion(occasion);
+    public String suggestOutfit(
+            @RequestParam String occasion,
+            @RequestParam String gender) throws IOException {
+        return outfitSuggestionService.getOutfitSuggestion(occasion, gender);
     }
 }
