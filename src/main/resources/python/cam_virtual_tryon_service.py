@@ -190,9 +190,10 @@ async def main():
         sys.exit(1)
 
     server = await websockets.serve(
-        lambda ws, path: virtual_try_on_session(ws, path, cloth_img),
-        host='localhost',
-        port=args.port
+        lambda websocket, path: virtual_try_on_session(websocket, path, cloth_img),
+        "localhost",
+        args.port,
+        ping_interval=None
     )
 
     print(f"Server started on ws://localhost:{args.port}")
