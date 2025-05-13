@@ -1,5 +1,15 @@
-2025-05-10T20:51:23.789+05:30 DEBUG 5940 --- [studio] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : POST "/api/shirts/compare?platform1=amazon&price1=200&description1=Premium%20bio-washed%20soft%20and%20smooth%20skin%20friendly%20100%25%20cotton%20%2Cblend%20with%20high%20quality%20Acid%20Wash%20with%20sharp%20details%20with%20minimal%20Print%20which%20give%20standout%20and%20refined%20touch%20Sleeve%20type%3A%20Half%20Sleeve%3B%20Neck%20Type%3A%20Round%20Neck%3B%20Fitting%20type%3A%20Oversized%20Fit%3B%20Age%20Range%20Description%3A%20Adult%3B%20Occasion%3A%20Casual.%20Washing%20Instructions%3A%20Wash%20inside%20out%2C%20in%20cold%20water%2C%20on%20gentle%20cycle.%20Tumble%20dry%20low%20or%20let%20air%20dry.%20Do%20not%20use%20Fabric%20Softeners%20or%20Bleach.%20Do%20not%20dry%20clean.%20Avoid%20ironing%20on%20the%20design.%20Fabric%3A%20100%25%20Cotton%2C%20Single%20Jercy%20Knitted%2C%20Drop%20Shoulder%20Over%20Sized%20Additional%20Information%20ManufacturerBee-Fits%20PackerBARANITHARAN%20CLOTHING%20baranitharanclothing%40gmail.com%20Tiruppur%20Item%20Weight250%20g%20Item%20Dimensions%20LxWxH15%20x%2013%20x%202%20Centimeters%20Net%20Quantity1%20Count%20Generic%20NameT-Shirt&platform2=myntra&price2=300.34&description2=bio-washed%20soft", parameters={multipart}
-2025-05-10T20:51:23.867+05:30 DEBUG 5940 --- [studio] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to io.metaverse.fashion.studio.controller.ShirtRecommendationController#compareShirts(MultipartFile, String, Double, String, MultipartFile, String, Double, String)
-2025-05-10T20:51:25.003+05:30 DEBUG 5940 --- [studio] [nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json]
-2025-05-10T20:51:25.007+05:30 DEBUG 5940 --- [studio] [nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{message=Python script failed with exit code: 1, status=error}]
-2025-05-10T20:51:25.012+05:30 DEBUG 5940 --- [studio] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 500 INTERNAL_SERVER_ERROR
+2025-05-13T18:09:08.812+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/api/virtual-try-on/start", parameters={multipart}
+2025-05-13T18:09:08.914+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to io.metaverse.fashion.studio.controller.CamVirtualTryOnController#startVirtualTryOn(MultipartFile, int)
+Starting Python process for virtual try-on...
+Executing command: python src/main/resources/python/cam_virtual_tryon_service.py --cloth C:\Users\DELL\AppData\Local\Temp\tryon-cloth-5000974772483996325.png --port 8765
+2025-05-13T18:09:09.095+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Found 'Content-Type:application/json' in response
+2025-05-13T18:09:09.098+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["{"message": "Virtual try-on started successfully", "port": 8765}"]
+2025-05-13T18:09:09.140+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+[Python Process] INFO:websockets.server:server listening on 127.0.0.1:8765
+[Python Process] INFO:websockets.server:server listening on [::1]:8765
+[Python Process] INFO:websockets.server:connection open
+[Python Process] ERROR:websockets.server:connection handler failed
+[Python Process] Traceback (most recent call last):
+[Python Process]   File "C:\Users\DELL\AppData\Local\Programs\Python\Python310\lib\site-packages\websockets\asyncio\server.py", line 376, in conn_handler
+[Python Process]     await self.handler(connection)
+[Python Process] TypeError: main.<locals>.<lambda>() missing 1 required positional argument: 'path'
