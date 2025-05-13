@@ -19,7 +19,11 @@ public class CamVirtualTryOnService {
     private Path currentClothImagePath;
 
     public void startPythonProcess(MultipartFile clothImage, int port) throws IOException {
+        // Add logging to confirm Python process execution
+        System.out.println("Starting Python process for virtual try-on...");
+
         if (isProcessRunning()) {
+            System.out.println("Python process is already running.");
             throw new IllegalStateException("Python process is already running");
         }
 
@@ -36,6 +40,9 @@ public class CamVirtualTryOnService {
                 "--cloth", currentClothImagePath.toString(),
                 "--port", String.valueOf(port)
         );
+
+        // Log the command being executed
+        System.out.println("Executing command: " + String.join(" ", processBuilder.command()));
 
         // Set up environment and redirects
         processBuilder.redirectErrorStream(true);

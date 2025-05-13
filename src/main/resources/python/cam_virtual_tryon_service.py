@@ -7,6 +7,11 @@ import json
 import sys
 import os
 import argparse
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load OpenCV's face and upper body detectors
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -133,8 +138,11 @@ async def virtual_try_on_session(websocket, path, cloth_img):
     # Initialize webcam
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
+        logger.error("Webcam could not be opened. Please check your webcam connection.")
         await websocket.send(json.dumps({'error': 'Could not open webcam'}))
         return
+
+    logger.info("Webcam initialized successfully.")
 
     cloth_processed = None
     cloth_mask_processed = None
@@ -143,19 +151,23 @@ async def virtual_try_on_session(websocket, path, cloth_img):
         while True:
             ret, frame = cap.read()
             if not ret:
+                logger.error("Failed to read frame from webcam.")
                 break
 
+            logger.info("Frame captured successfully.")
             frame = cv2.flip(frame, 1)
 
             # Detect upper body and process frame
             upper_body_rect = detect_upper_body(frame)
             if upper_body_rect is not None:
+                logger.info(f"Upper body detected: {upper_body_rect}")
                 target_width = upper_body_rect[2] - upper_body_rect[0]
                 target_height = upper_body_rect[3] - upper_body_rect[1]
                 cloth_processed, cloth_mask_processed = process_cloth_image(cloth_img, target_width, target_height)
 
                 if cloth_processed is not None:
                     frame = overlay_cloth(frame, upper_body_rect, cloth_processed, cloth_mask_processed)
+                    logger.info("Cloth overlay applied successfully.")
 
             # Send frame to client
             _, buffer = cv2.imencode('.jpg', frame)
