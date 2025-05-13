@@ -129,8 +129,9 @@ def overlay_cloth(frame, upper_body_rect, cloth_img, cloth_mask):
     frame[y1:y2, x1:x2] = blended_roi
     return frame
 
+# Ensure the WebSocket handler correctly handles the 'path' argument
 async def virtual_try_on_session(websocket, path, cloth_img):
-    print(f"Client connected: {websocket.remote_address}")
+    logger.info(f"Client connected: {websocket.remote_address}, Path: {path}")
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         logger.error("Webcam could not be opened.")
@@ -171,7 +172,7 @@ async def virtual_try_on_session(websocket, path, cloth_img):
                 continue
 
     except Exception as e:
-        logger.exception("Error occurred:")
+        logger.exception("Error occurred during WebSocket session:")
         await websocket.send(json.dumps({'error': str(e)}))
     finally:
         cap.release()
@@ -189,8 +190,11 @@ async def main():
         print("Error: Could not read cloth image.")
         sys.exit(1)
 
+    # Define a default path variable to pass to the session
+    default_path = "/virtual-try-on"
+
     server = await websockets.serve(
-        lambda websocket, path: virtual_try_on_session(websocket, path, cloth_img),
+        lambda websocket, path: virtual_try_on_session(websocket, default_path, cloth_img),
         "localhost",
         args.port,
         ping_interval=None

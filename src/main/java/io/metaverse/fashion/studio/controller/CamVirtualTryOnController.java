@@ -31,8 +31,14 @@ public class CamVirtualTryOnController {
                 return ResponseEntity.badRequest().body("{\"error\": \"Only image files are allowed\"}");
             }
 
+            // Add logging to debug the parameters passed to the Python process
+            System.out.println("Starting virtual try-on with cloth image: " + clothImage.getOriginalFilename() + ", Port: " + port);
+
             // Start the Python process
             virtualTryOnService.startPythonProcess(clothImage, port);
+
+            // Ensure the response from the Python process is logged
+            System.out.println("Python process started successfully. Listening on port: " + port);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
