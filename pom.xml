@@ -128,7 +128,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
-            <version>5.3.27</version>
         </dependency>
 	</dependencies>
 
