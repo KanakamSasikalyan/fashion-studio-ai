@@ -111,4 +111,23 @@ public class CamVirtualTryOnService {
     public void setPythonExecutable(String executable) {
         this.pythonExecutable = executable;
     }
+
+    public String saveClothImage(MultipartFile clothImage) throws IOException {
+        Path tempFile = Files.createTempFile("cloth-image-", ".png");
+        try (InputStream inputStream = clothImage.getInputStream()) {
+            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        }
+        return tempFile.toAbsolutePath().toString();
+    }
+
+    public void startVirtualTryOn(String clothImagePath, SimpMessagingTemplate messagingTemplate) {
+        // Logic to start the virtual try-on process using the cloth image
+        System.out.println("Starting virtual try-on with image: " + clothImagePath);
+        // Add WebSocket or messaging logic here if needed
+    }
+
+    public void stopVirtualTryOn() {
+        // Logic to stop the virtual try-on process
+        System.out.println("Stopping virtual try-on process.");
+    }
 }
