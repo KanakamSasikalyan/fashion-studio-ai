@@ -32,7 +32,10 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 COPY src/main/resources/python/requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Ensure Python scripts are executable
+RUN chmod +x src/main/resources/python/*.py
 
 EXPOSE 8080
 

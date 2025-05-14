@@ -4,3 +4,8 @@ Pillow
 diffusers
 psutil
 cloudinary
+opencv-python
+websockets
+pandas
+scikit-learn
+joblib
