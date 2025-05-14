@@ -30,11 +30,18 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Add environment variables for database configuration
+ENV SPRING_PROFILES_ACTIVE=prod
+ENV SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-cvudalbe5dus73cjfbq0-a.oregon-postgres.render.com:5432/fashion_studio_db
+ENV SPRING_DATASOURCE_USERNAME=fashion_studio_db_user
+ENV SPRING_DATASOURCE_PASSWORD=tzXkeI8fTqy320jfIuL8PQGZ6Qhw35VU
+
+# Ensure Python dependencies are installed
 COPY src/main/resources/python/requirements.txt requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Ensure Python scripts are executable
+# Copy Python scripts and make them executable
+COPY src/main/resources/python/ src/main/resources/python/
 RUN chmod +x src/main/resources/python/*.py
 
 EXPOSE 8080
