@@ -1,15 +1,16 @@
-2025-05-13T18:09:08.812+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/api/virtual-try-on/start", parameters={multipart}
-2025-05-13T18:09:08.914+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to io.metaverse.fashion.studio.controller.CamVirtualTryOnController#startVirtualTryOn(MultipartFile, int)
-Starting Python process for virtual try-on...
-Executing command: python src/main/resources/python/cam_virtual_tryon_service.py --cloth C:\Users\DELL\AppData\Local\Temp\tryon-cloth-5000974772483996325.png --port 8765
-2025-05-13T18:09:09.095+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Found 'Content-Type:application/json' in response
-2025-05-13T18:09:09.098+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["{"message": "Virtual try-on started successfully", "port": 8765}"]
-2025-05-13T18:09:09.140+05:30 DEBUG 5476 --- [studio] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-[Python Process] INFO:websockets.server:server listening on 127.0.0.1:8765
-[Python Process] INFO:websockets.server:server listening on [::1]:8765
-[Python Process] INFO:websockets.server:connection open
-[Python Process] ERROR:websockets.server:connection handler failed
-[Python Process] Traceback (most recent call last):
-[Python Process]   File "C:\Users\DELL\AppData\Local\Programs\Python\Python310\lib\site-packages\websockets\asyncio\server.py", line 376, in conn_handler
-[Python Process]     await self.handler(connection)
-[Python Process] TypeError: main.<locals>.<lambda>() missing 1 required positional argument: 'path'
+react refresh:37 WebSocket connection to 'wss://react-frontend-m196.onrender.com:10000/ws' failed:
+(anonymous)	@	react refresh:37
+__webpack_require__	@	bootstrap:22
+(anonymous)	@	startup:5
+(anonymous)	@	startup:7
+
+WebSocketClient.js:13 WebSocket connection to 'wss://react-frontend-m196.onrender.com:10000/ws' failed:
+WebSocketClient	@	WebSocketClient.js:13
+initSocket	@	socket.js:27
+(anonymous)	@	socket.js:51
+/login:1 Access to fetch at 'https://fashion-studio-ai.onrender.com/api/auth/login' from origin 'https://react-frontend-m196.onrender.com' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+Login.jsx:14
+POST https://fashion-studio-ai.onrender.com/api/auth/login net::ERR_FAILED
+handleSubmit	@	Login.jsx:14
+Login.jsx:30 Error during login: TypeError: Failed to fetch
+at handleSubmit (Login.jsx:14:1)
