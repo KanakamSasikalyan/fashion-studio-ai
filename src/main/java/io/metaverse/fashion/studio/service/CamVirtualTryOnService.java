@@ -3,6 +3,7 @@ package io.metaverse.fashion.studio.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.io.*;
 import java.nio.file.Files;
