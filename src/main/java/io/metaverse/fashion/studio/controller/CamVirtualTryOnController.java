@@ -17,7 +17,7 @@ public class CamVirtualTryOnController {
     private final SimpMessagingTemplate messagingTemplate;
 
     public CamVirtualTryOnController(CamVirtualTryOnService virtualTryOnService,
-                                  SimpMessagingTemplate messagingTemplate) {
+                                     SimpMessagingTemplate messagingTemplate) {
         this.virtualTryOnService = virtualTryOnService;
         this.messagingTemplate = messagingTemplate;
     }
@@ -30,6 +30,8 @@ public class CamVirtualTryOnController {
             return ResponseEntity.ok("Virtual try-on started successfully");
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error processing image: " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
