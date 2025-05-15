@@ -27,7 +27,7 @@ public class DesignController {
         this.aiService = aiService;
     }
 
-    @PostMapping("/generate")
+    @GetMapping("/generate")
     public ResponseEntity<?> generateDesign(
             @RequestParam String prompt,
             @RequestParam(defaultValue = "casual") String style

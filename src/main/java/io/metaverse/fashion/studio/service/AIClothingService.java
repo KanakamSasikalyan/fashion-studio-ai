@@ -115,6 +115,7 @@ public class AIClothingService {
                         String line;
                         String imageUrl = null;
                         while ((line = reader.readLine()) != null) {
+                            log.info("Python Output Line: {}", line); // Add this line for debugging
                             if (line.startsWith("PROGRESS:")) {
                                 String percent = line.replace("PROGRESS:", "").trim();
                                 emitter.next(ServerSentEvent.builder(percent).build());
@@ -129,6 +130,7 @@ public class AIClothingService {
                     }
                     emitter.complete();
                 } catch (Exception e) {
+                    log.error("Error in generateClothingDesignStream", e);
                     emitter.next(ServerSentEvent.builder("ERROR:" + e.getMessage()).build());
                     emitter.complete();
                 }
