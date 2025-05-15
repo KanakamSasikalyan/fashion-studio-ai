@@ -46,8 +46,9 @@ def main():
         # Parse arguments
         prompt = sys.argv[1].strip('"')
         style = sys.argv[2]
-        output_dir = sys.argv[3]
-        logger.info(f"Prompt: '{prompt}' | Style: {style}")
+        gender = sys.argv[3]
+        output_dir = sys.argv[4]
+        logger.info(f"Prompt: '{prompt}' | Style: {style} | Gender: {gender}")
 
         # Hardware check
         log_hardware_info()
@@ -73,7 +74,8 @@ def main():
         logger.info(f"Generating image (steps=25, size=512x512)...")
         gen_start = time.time()
 
-        tempPrompt = prompt + ", Note:strictly no human faces or gestures are to be included."
+        # Add gender to prompt for better results
+        tempPrompt = f"{prompt}, for a {gender}, Note:strictly no human faces or gestures are to be included."
 
         image = pipe(
             tempPrompt,

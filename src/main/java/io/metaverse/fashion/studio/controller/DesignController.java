@@ -30,11 +30,12 @@ public class DesignController {
     @GetMapping("/generate")
     public ResponseEntity<?> generateDesign(
             @RequestParam String prompt,
-            @RequestParam(defaultValue = "casual") String style
+            @RequestParam(defaultValue = "casual") String style,
+            @RequestParam(defaultValue = "man") String gender
     ) {
         try {
             String decodedPrompt = URLDecoder.decode(prompt, StandardCharsets.UTF_8);
-            ClothingDesign design = aiService.generateClothingDesign(decodedPrompt, style);
+            ClothingDesign design = aiService.generateClothingDesign(decodedPrompt, style, gender);
             return ResponseEntity.ok(design);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("Error generating design: " + e.getMessage());
@@ -46,13 +47,19 @@ public class DesignController {
     @GetMapping(value = "/generate/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> generateDesignStream(
             @RequestParam String prompt,
-            @RequestParam(defaultValue = "casual") String style
+            @RequestParam(defaultValue = "casual") String style,
+            @RequestParam(defaultValue = "man") String gender
     ) {
-        return aiService.generateClothingDesignStream(prompt, style);
+        return aiService.generateClothingDesignStream(prompt, style, gender);
     }
 
     @GetMapping("/image-urls")
     public List<String> getAllImageUrls() {
         return aiService.getAllImageUrls();
+    }
+
+    @GetMapping("/all")
+    public List<ClothingDesign> getAllDesigns() {
+        return aiService.getAllDesigns();
     }
 }

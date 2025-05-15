@@ -42,7 +42,7 @@ public class AIClothingService {
         return clothingDesignRepository.findAllImageUrls();
     }
 
-    public ClothingDesign generateClothingDesign(String prompt, String style) throws IOException {
+    public ClothingDesign generateClothingDesign(String prompt, String style, String gender) throws IOException {
         // Ensure output directory exists
         Files.createDirectories(Paths.get(outputDir));
 
@@ -51,6 +51,7 @@ public class AIClothingService {
                 pythonScriptPath,
                 "\"" + prompt + "\"",
                 style,
+                gender,
                 outputDir
         );
 
@@ -87,6 +88,7 @@ public class AIClothingService {
         ClothingDesign design = new ClothingDesign();
         design.setPrompt(prompt);
         design.setStyle(style);
+        design.setGender(gender);
         design.setImageUrl(imageUrl);
 
         log.debug("Attempting to save design to database");
@@ -96,7 +98,7 @@ public class AIClothingService {
         return design;
     }
 
-    public Flux<ServerSentEvent<String>> generateClothingDesignStream(String prompt, String style) {
+    public Flux<ServerSentEvent<String>> generateClothingDesignStream(String prompt, String style, String gender) {
         return Flux.create(emitter -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> {
@@ -107,6 +109,7 @@ public class AIClothingService {
                             pythonScriptPath,
                             "\"" + prompt + "\"",
                             style,
+                            gender,
                             outputDir
                     );
                     pb.redirectErrorStream(true);
