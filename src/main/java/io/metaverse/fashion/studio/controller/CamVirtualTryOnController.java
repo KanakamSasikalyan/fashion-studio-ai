@@ -17,7 +17,7 @@ public class CamVirtualTryOnController {
     private final SimpMessagingTemplate messagingTemplate;
 
     public CamVirtualTryOnController(CamVirtualTryOnService virtualTryOnService,
-                                  SimpMessagingTemplate messagingTemplate) {
+                                     SimpMessagingTemplate messagingTemplate) {
         this.virtualTryOnService = virtualTryOnService;
         this.messagingTemplate = messagingTemplate;
     }
