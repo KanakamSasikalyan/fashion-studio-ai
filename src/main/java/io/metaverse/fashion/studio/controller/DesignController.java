@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/designs")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class DesignController {
 
     private final AIClothingService aiService;
