@@ -1,16 +1,5 @@
-react refresh:37 WebSocket connection to 'wss://react-frontend-m196.onrender.com:10000/ws' failed:
-(anonymous)	@	react refresh:37
-__webpack_require__	@	bootstrap:22
-(anonymous)	@	startup:5
-(anonymous)	@	startup:7
-
-WebSocketClient.js:13 WebSocket connection to 'wss://react-frontend-m196.onrender.com:10000/ws' failed:
-WebSocketClient	@	WebSocketClient.js:13
-initSocket	@	socket.js:27
-(anonymous)	@	socket.js:51
-/login:1 Access to fetch at 'https://fashion-studio-ai.onrender.com/api/auth/login' from origin 'https://react-frontend-m196.onrender.com' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
-Login.jsx:14
-POST https://fashion-studio-ai.onrender.com/api/auth/login net::ERR_FAILED
-handleSubmit	@	Login.jsx:14
-Login.jsx:30 Error during login: TypeError: Failed to fetch
-at handleSubmit (Login.jsx:14:1)
+request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-05-15T15:28:36.235+05:30  INFO 2088 --- [studio] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 11 ms
+2025-05-15T15:28:36.611+05:30 DEBUG 2088 --- [studio] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/designs/generate/stream?prompt=I%20need%20a%20black%20shirt%20with%20white%20strips&style=casual", parameters={masked}
+2025-05-15T15:28:36.624+05:30  WARN 2088 --- [studio] [nio-8080-exec-1] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-05-15T15:28:36.628+05:30 DEBUG 2088 --- [studio] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 405 METHOD_NOT_ALLOWED
