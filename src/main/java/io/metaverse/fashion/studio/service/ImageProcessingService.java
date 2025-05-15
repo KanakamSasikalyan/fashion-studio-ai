@@ -55,26 +55,27 @@ public class ImageProcessingService {
             Process process = pb.start();
 
             // Read output
-            StringBuilder output = new StringBuilder();
+            StringBuilder pythonOutput = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    output.append(line);
+                    pythonOutput.append(line).append("\n");
                 }
             }
 
             int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new IOException("Python script failed: " + output.toString());
+            logger.info("Python remove_background.py output: " + pythonOutput.toString());
+            if (exitCode != 0 || !pythonOutput.toString().contains("SUCCESS:")) {
+                throw new IOException("Python script failed: " + pythonOutput.toString());
             }
 
             // Parse output
-            if (output.toString().startsWith("SUCCESS:")) {
-                String processedPath = output.toString().substring(8);
+            if (pythonOutput.toString().startsWith("SUCCESS:")) {
+                String processedPath = pythonOutput.toString().substring(8);
                 return processedPath;
             } else {
-                throw new IOException(output.toString());
+                throw new IOException(pythonOutput.toString());
             }
         } finally {
             // Clean up input file (output file will be served)
