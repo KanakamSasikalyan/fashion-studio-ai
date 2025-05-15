@@ -20,7 +20,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // ✅ Enable CORS using the config below
                 .csrf(csrf -> csrf.disable())    // Optional: Disable CSRF for APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() // Allow open access to your APIs
+                        .requestMatchers("/api/**", "/virtual-try-on-websocket/**").permitAll() // Allow open access
                         .anyRequest().authenticated()
                 );
 
@@ -31,17 +31,21 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of(
-                "https://fashion-studio-ai.onrender.com",
                 "http://localhost:3000",
                 "http://localhost:8080",
-                "https://react-frontend-m196.onrender.com" // Added React frontend URL
+                "https://fashion-studio-ai.onrender.com",
+                "https://react-frontend-m196.onrender.com"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // ✅ This is safe with origin patterns
+        configuration.setAllowCredentials(true); // ✅ Allows cookies and credentials
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // ✅ Register CORS for both REST and WebSocket paths
         source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/virtual-try-on-websocket/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // Optional fallback
+
         return source;
     }
 }

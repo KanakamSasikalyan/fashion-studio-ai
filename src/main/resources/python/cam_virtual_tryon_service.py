@@ -5,16 +5,11 @@ import base64
 import sys
 import time
 import json
-import websockets
-import logging
-import asyncio
 
 # Set up argument parsing
 parser = argparse.ArgumentParser(description='Virtual Try-On Application')
 parser.add_argument('--cloth-image', type=str, required=True,
                    help='Path to the cloth image for virtual try-on')
-parser.add_argument('--port', type=int, required=True,
-                   help='Port for the WebSocket server')
 args = parser.parse_args()
 
 # Initialize webcam
@@ -142,67 +137,45 @@ def overlay_cloth(frame, upper_body_rect, cloth_img, cloth_mask):
     frame[y1:y2, x1:x2] = blended_roi
     return frame
 
-async def virtual_try_on_session(websocket, path, cloth_img):
-    try:
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                await websocket.send(json.dumps({"type": "error", "message": "Failed to capture frame"}))
-                break
+try:
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print(json.dumps({"type": "error", "message": "Failed to capture frame"}))
+            break
 
-            frame = cv2.flip(frame, 1)
+        frame = cv2.flip(frame, 1)
 
-            upper_body_rect = detect_upper_body(frame)
+        upper_body_rect = detect_upper_body(frame)
 
-            if upper_body_rect is not None:
-                target_width = upper_body_rect[2] - upper_body_rect[0]
-                target_height = upper_body_rect[3] - upper_body_rect[1]
-                cloth_processed, cloth_mask_processed = process_cloth_image(cloth_img, target_width, target_height)
+        if upper_body_rect is not None:
+            target_width = upper_body_rect[2] - upper_body_rect[0]
+            target_height = upper_body_rect[3] - upper_body_rect[1]
+            cloth_processed, cloth_mask_processed = process_cloth_image(cloth_img, target_width, target_height)
 
-                if cloth_processed is not None:
-                    frame = overlay_cloth(frame, upper_body_rect, cloth_processed, cloth_mask_processed)
+            if cloth_processed is not None:
+                frame = overlay_cloth(frame, upper_body_rect, cloth_processed, cloth_mask_processed)
 
-            # Encode frame to JPEG and base64
-            ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-            if not ret:
-                await websocket.send(json.dumps({"type": "error", "message": "Failed to encode frame"}))
-                continue
+        # Encode frame to JPEG and base64
+        ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        if not ret:
+            print(json.dumps({"type": "error", "message": "Failed to encode frame"}))
+            continue
 
-            frame_base64 = base64.b64encode(buffer).decode('utf-8')
+        frame_base64 = base64.b64encode(buffer).decode('utf-8')
 
-            # Send frame as JSON
-            await websocket.send(json.dumps({
-                "type": "frame",
-                "data": frame_base64,
-                "timestamp": time.time()
-            }))
+        # Send frame as JSON
+        print(json.dumps({
+            "type": "frame",
+            "data": frame_base64,
+            "timestamp": time.time()
+        }))
+        sys.stdout.flush()
 
-            await asyncio.sleep(0.05)
+        time.sleep(0.05)
 
-    except websockets.ConnectionClosed:
-        print(json.dumps({"type": "status", "message": "WebSocket connection closed"}))
-
-async def main():
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-
-    # Ensure the WebSocket server is properly initialized
-    server = await websockets.serve(
-        lambda websocket, path: virtual_try_on_session(websocket, path, cloth_img),
-        "0.0.0.0",  # Bind to all network interfaces
-        args.port,
-        ping_interval=None
-    )
-
-    logger.info(f"WebSocket server started on ws://0.0.0.0:{args.port}")
-
-    await server.wait_closed()
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print(json.dumps({"type": "status", "message": "stopping"}))
-    finally:
-        cap.release()
-        cv2.destroyAllWindows()
+except KeyboardInterrupt:
+    print(json.dumps({"type": "status", "message": "stopping"}))
+finally:
+    cap.release()
+    cv2.destroyAllWindows()
