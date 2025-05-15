@@ -1,16 +1,7 @@
-queued tasks = 0, completed tasks = 2]
-2025-05-15T23:23:05.927+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/api/image/remove-background", parameters={}
-2025-05-15T23:23:05.965+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to io.metaverse.fashion.studio.controller.ImageProcessingController#removeBackground(String)
-2025-05-15T23:23:06.123+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-5] o.s.web.method.HandlerMethod             : Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<?> io.metaverse.fashion.studio.controller.ImageProcessingController.removeBackground(java.lang.String): Required request parameter 'imageUrl' for method parameter type String is not present
-2025-05-15T23:23:06.164+05:30  WARN 8076 --- [studio] [nio-8080-exec-5] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.bind.MissingServletRequestParameterException: Required request parameter 'imageUrl' for method parameter type String is not present]
-2025-05-15T23:23:06.176+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
-
-
-2: Error
-
-2025-05-15T23:27:39.326+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : POST "/api/virtual-tryon/generate", parameters={multipart}
-2025-05-15T23:27:39.397+05:30  WARN 8076 --- [studio] [nio-8080-exec-3] org.apache.catalina.connector.Request    : Creating the temporary upload location [C:\Users\DELL\AppData\Local\Temp\tomcat.8080.5630078631082919414\work\Tomcat\localhost\ROOT] as it is required by the servlet [dispatcherServlet]
-2025-05-15T23:27:39.471+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-3] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
-2025-05-15T23:27:39.590+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-3] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
-2025-05-15T23:27:39.606+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-3] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/virtual-tryon/generate.]
-2025-05-15T23:27:39.610+05:30 DEBUG 8076 --- [studio] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2025-05-16T00:35:59.916+05:30 DEBUG 12236 --- [studio] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : POST "/api/image/remove-background", parameters={}
+2025-05-16T00:35:59.917+05:30 DEBUG 12236 --- [studio] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to io.metaverse.fashion.studio.controller.ImageProcessingController#removeBackground(Map)
+2025-05-16T00:36:00.005+05:30 DEBUG 12236 --- [studio] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [{imageUrl=https://ik.imagekit.io/sp7ub8zm6/fashion_designs/design_0006.jpg}]
+2025-05-16T00:36:02.791+05:30 DEBUG 12236 --- [studio] [nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
+2025-05-16T00:36:02.792+05:30 DEBUG 12236 --- [studio] [nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["{"error":"Python script failed: Traceback (most recent call last):  File "C:\Users\DELL\Downloads\Gi (truncated)..."]
+2025-05-16T00:36:02.799+05:30 DEBUG 12236 --- [studio] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 500 INTERNAL_SERVER_ERROR
+2025-05-16T00:36:28.601+05:30  INFO 12236 --- [studio] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
