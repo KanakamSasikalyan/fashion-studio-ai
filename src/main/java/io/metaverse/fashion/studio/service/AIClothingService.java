@@ -42,6 +42,10 @@ public class AIClothingService {
         return clothingDesignRepository.findAllImageUrls();
     }
 
+    public List<ClothingDesign> getAllDesigns() {
+        return clothingDesignRepository.findAll();
+    }
+
     public ClothingDesign generateClothingDesign(String prompt, String style, String gender) throws IOException {
         // Ensure output directory exists
         Files.createDirectories(Paths.get(outputDir));
