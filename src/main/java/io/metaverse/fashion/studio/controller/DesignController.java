@@ -43,7 +43,7 @@ public class DesignController {
         }
     }
 
-    @PostMapping(value = "/generate/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/generate/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> generateDesignStream(
             @RequestParam String prompt,
             @RequestParam(defaultValue = "casual") String style
