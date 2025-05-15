@@ -3,12 +3,16 @@ package io.metaverse.fashion.studio.controller;
 import io.metaverse.fashion.studio.entity.ClothingDesign;
 import io.metaverse.fashion.studio.service.AIClothingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -37,6 +41,14 @@ public class DesignController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
+    }
+
+    @PostMapping(value = "/generate/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> generateDesignStream(
+            @RequestParam String prompt,
+            @RequestParam(defaultValue = "casual") String style
+    ) {
+        return aiService.generateClothingDesignStream(prompt, style);
     }
 
     @GetMapping("/image-urls")

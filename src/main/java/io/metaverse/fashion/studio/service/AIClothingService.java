@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.http.codec.ServerSentEvent;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +17,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 @Service
 public class AIClothingService {
@@ -89,5 +94,45 @@ public class AIClothingService {
         log.info("Design successfully saved to database with ID: {}", savedDesign.getId());
 
         return design;
+    }
+
+    public Flux<ServerSentEvent<String>> generateClothingDesignStream(String prompt, String style) {
+        return Flux.create(emitter -> {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                try {
+                    Files.createDirectories(Paths.get(outputDir));
+                    ProcessBuilder pb = new ProcessBuilder(
+                            "python",
+                            pythonScriptPath,
+                            "\"" + prompt + "\"",
+                            style,
+                            outputDir
+                    );
+                    pb.redirectErrorStream(true);
+                    Process process = pb.start();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                        String line;
+                        String imageUrl = null;
+                        while ((line = reader.readLine()) != null) {
+                            if (line.startsWith("PROGRESS:")) {
+                                String percent = line.replace("PROGRESS:", "").trim();
+                                emitter.next(ServerSentEvent.builder(percent).build());
+                            } else if (line.startsWith("http")) {
+                                imageUrl = line.trim();
+                                emitter.next(ServerSentEvent.builder("COMPLETE:" + imageUrl).build());
+                            } else if (line.startsWith("ERROR")) {
+                                emitter.next(ServerSentEvent.builder("ERROR:" + line).build());
+                            }
+                        }
+                        process.waitFor();
+                    }
+                    emitter.complete();
+                } catch (Exception e) {
+                    emitter.next(ServerSentEvent.builder("ERROR:" + e.getMessage()).build());
+                    emitter.complete();
+                }
+            });
+        }, FluxSink.OverflowStrategy.BUFFER);
     }
 }
