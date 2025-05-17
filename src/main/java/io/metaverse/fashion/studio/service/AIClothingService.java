@@ -37,7 +37,6 @@ public class AIClothingService {
         this.clothingDesignRepository = clothingDesignRepository;
     }
 
-    //to return all the image urls
     public List<String> getAllImageUrls() {
         return clothingDesignRepository.findAllImageUrls();
     }
@@ -47,7 +46,6 @@ public class AIClothingService {
     }
 
     public ClothingDesign generateClothingDesign(String prompt, String style, String gender) throws IOException {
-        // Ensure output directory exists
         Files.createDirectories(Paths.get(outputDir));
 
         ProcessBuilder pb = new ProcessBuilder(
@@ -59,14 +57,11 @@ public class AIClothingService {
                 outputDir
         );
 
-        // Redirect error stream to standard output
         pb.redirectErrorStream(true);
-
         Process process = pb.start();
 
         String imageUrl = null;
 
-        // Capture and log Python output in real-time
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {
 
@@ -77,7 +72,6 @@ public class AIClothingService {
                 } else {
                     log.info("Python Output: {}", line);
 
-                    // Check if the line is the image URL (the last line printed by Python)
                     if (line.startsWith("http")) {
                         imageUrl = line.trim();
                     }
@@ -85,17 +79,12 @@ public class AIClothingService {
             }
         }
 
-        log.info("Image generation completed...");
-        log.info("Trying to save the imageUrl into database...");
-
-        // Store image in database using JPA repository
         ClothingDesign design = new ClothingDesign();
         design.setPrompt(prompt);
         design.setStyle(style);
         design.setGender(gender);
         design.setImageUrl(imageUrl);
 
-        log.debug("Attempting to save design to database");
         ClothingDesign savedDesign = clothingDesignRepository.save(design);
         log.info("Design successfully saved to database with ID: {}", savedDesign.getId());
 
@@ -122,12 +111,28 @@ public class AIClothingService {
                         String line;
                         String imageUrl = null;
                         while ((line = reader.readLine()) != null) {
-                            log.info("Python Output Line: {}", line); // Add this line for debugging
+                            log.info("Python Output Line: {}", line);
                             if (line.startsWith("PROGRESS:")) {
                                 String percent = line.replace("PROGRESS:", "").trim();
                                 emitter.next(ServerSentEvent.builder(percent).build());
                             } else if (line.startsWith("http")) {
                                 imageUrl = line.trim();
+
+                                log.info("Image generation completed...");
+                                log.info("Trying to save the imageUrl into database...");
+
+                                // Store image in database using JPA repository
+                                ClothingDesign design = new ClothingDesign();
+                                design.setPrompt(prompt);
+                                design.setStyle(style);
+                                design.setImageUrl(gender);
+                                design.setImageUrl(imageUrl);
+
+                                log.debug("Attempting to save design to database");
+                                ClothingDesign savedDesign = clothingDesignRepository.save(design);
+                                log.info("Design successfully saved to database with ID: {}", savedDesign.getId());
+
+
                                 emitter.next(ServerSentEvent.builder("COMPLETE:" + imageUrl).build());
                             } else if (line.startsWith("ERROR")) {
                                 emitter.next(ServerSentEvent.builder("ERROR:" + line).build());
