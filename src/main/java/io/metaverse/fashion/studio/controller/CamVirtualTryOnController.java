@@ -31,8 +31,7 @@ public class CamVirtualTryOnController {
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error processing image: " + e.getMessage());
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return ResponseEntity.internalServerError().body("Processing interrupted");
+            throw new RuntimeException(e);
         }
     }
 
