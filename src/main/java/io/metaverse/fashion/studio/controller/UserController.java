@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -24,12 +26,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
         boolean isAuthenticated = userService.loginUser(username, password);
         if (isAuthenticated) {
-            return ResponseEntity.ok("Login successful");
+            return ResponseEntity.ok(Map.of("message", "Login successful", "user", username));
         } else {
-            return ResponseEntity.status(401).body("Invalid username or password");
+            return ResponseEntity.status(401).body(Map.of("message", "Invalid username or password"));
         }
     }
 }
