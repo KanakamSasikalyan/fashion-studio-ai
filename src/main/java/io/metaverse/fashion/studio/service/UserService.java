@@ -51,7 +51,7 @@ public class UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(sha256Hash(password)); // Hash the password before saving
         return userRepository.save(user);
     }
 
