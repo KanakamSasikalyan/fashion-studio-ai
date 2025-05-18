@@ -50,4 +50,18 @@ public class UserService {
         user.setPassword(password); // Store as plain text
         return userRepository.save(user);
     }
+
+    public boolean updatePassword(String identifier, String newPassword) {
+        Optional<User> userOpt = userRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByEmail(identifier);
+        }
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setPassword(newPassword); // Store as plain text
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
 }

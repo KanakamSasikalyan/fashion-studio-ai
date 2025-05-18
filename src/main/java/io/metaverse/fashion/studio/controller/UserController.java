@@ -34,4 +34,20 @@ public class UserController {
             return ResponseEntity.status(401).body(Map.of("message", "Invalid username or password"));
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
+        String identifier = payload.get("identifier"); // username or email
+        String newPassword = payload.get("newPassword");
+        String confirmPassword = payload.get("confirmPassword");
+        if (newPassword == null || !newPassword.equals(confirmPassword)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Passwords do not match"));
+        }
+        boolean updated = userService.updatePassword(identifier, newPassword);
+        if (updated) {
+            return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+        } else {
+            return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+        }
+    }
 }
