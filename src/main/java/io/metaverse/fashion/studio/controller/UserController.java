@@ -26,7 +26,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
+        String username = payload.get("username");
+        String password = payload.get("password");
         boolean isAuthenticated = userService.loginUser(username, password);
         if (isAuthenticated) {
             return ResponseEntity.ok(Map.of("message", "Login successful", "user", username));
