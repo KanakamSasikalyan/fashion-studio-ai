@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Service
@@ -21,8 +18,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public User saveUser(User user) {
-        user.setPassword(sha256Hash(user.getPassword()));
-        log.info("Hashed password: " + user.getPassword());
+        // No hashing, store password as plain text
         return userRepository.save(user);
     }
 
@@ -38,8 +34,8 @@ public class UserService {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            String hashedInput = sha256Hash(password);
-            return hashedInput.equals(user.getPassword());
+            // Compare plain text passwords
+            return password.equals(user.getPassword());
         }
         return false;
     }
@@ -51,26 +47,7 @@ public class UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(sha256Hash(password)); // Hash the password before saving
+        user.setPassword(password); // Store as plain text
         return userRepository.save(user);
-    }
-
-    private String sha256Hash(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-
-            // Convert byte[] to hex
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashedBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
     }
 }
