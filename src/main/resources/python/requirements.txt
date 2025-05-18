@@ -10,3 +10,4 @@ pandas
 scikit-learn
 joblib
 imagekitio
+rembg

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@CrossOrigin(origins = {"https://react-frontend-m196.onrender.com", "http://localhost:3000"}, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
