@@ -33,7 +33,8 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:8080",
-                "https://react-frontend-jsy8.onrender.com"
+                "https://react-frontend-jsy8.onrender.com",
+                "https://react-frontend-fz1m.onrender.com" // Add this line
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
