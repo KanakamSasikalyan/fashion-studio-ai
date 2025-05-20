@@ -30,12 +30,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:3000",
-                "http://localhost:8080",
-                "https://fashion-studio-ai.onrender.com",
-                "https://react-frontend-m196.onrender.com"
-        ));
+        configuration.setAllowedOriginPatterns(List.of("*")); // Allow all origins
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // ✅ Allows cookies and credentials
