@@ -41,6 +41,6 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY src/main/resources/python/ src/main/resources/python/
 RUN chmod +x src/main/resources/python/*.py
 
-EXPOSE 8080
+EXPOSE 80
 
 ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=${PORT}"]
