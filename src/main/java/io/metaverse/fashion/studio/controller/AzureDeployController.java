@@ -8,6 +8,6 @@ public class AzureDeployController {
 
     @GetMapping("/azure-deploy")
     public String azureDeployTest(){
-        return "Welcome, Fashion Studio Backend Deployed Successfully!";
+        return "Hello There, Fashion Studio Backend Deployed Successfully!";
     }
 }
