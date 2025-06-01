@@ -9,7 +9,9 @@ on:
 env:
   AZURE_WEBAPP_NAME: 'backend-fashion-studio-ai'
   AZURE_WEBAPP_SLOT: 'Production'
-  CONTAINER_REGISTRY: 'ghcr.io' # GitHub Container Registry
+  CONTAINER_REGISTRY: 'ghcr.io'
+  # Force lowercase repository name
+  REPO_NAME: ${{ format('{0}/{1}', github.repository_owner, github.repository_name) | lower }}
 
 jobs:
   build-and-deploy:
@@ -41,12 +43,13 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:latest
-            ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+            ${{ env.CONTAINER_REGISTRY }}/${{ env.REPO_NAME }}:latest
+            ${{ env.CONTAINER_REGISTRY }}/${{ env.REPO_NAME }}:${{ github.sha }}
           file: ./Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Rest of your workflow remains the same...
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -60,5 +63,5 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: ${{ env.AZURE_WEBAPP_SLOT }}
-          images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.REPO_NAME }}:${{ github.sha }}
           configuration-file: ./Dockerfile
