@@ -156,14 +156,19 @@ def main():
     try:
         check_and_train_model()
 
-        if len(sys.argv) < 3:
-            raise ValueError("Please provide occasion and gender (optional: season)")
-
-        occasion = sys.argv[1]
-        gender = sys.argv[2].lower()
-        season = sys.argv[3].lower() if len(sys.argv) > 3 else 'all'
-
-        predict_outfit(occasion, gender, season)
+        # If only one argument (besides script name), treat as prompt
+        if len(sys.argv) == 2:
+            prompt = sys.argv[1]
+            gender = 'unisex'
+            season = 'all'
+            predict_outfit(prompt, gender, season)
+        elif len(sys.argv) >= 3:
+            occasion = sys.argv[1]
+            gender = sys.argv[2].lower()
+            season = sys.argv[3].lower() if len(sys.argv) > 3 else 'all'
+            predict_outfit(occasion, gender, season)
+        else:
+            raise ValueError("Please provide either a prompt or occasion and gender (optional: season)")
 
     except Exception as e:
         error_result = {
