@@ -2,8 +2,6 @@ package io.metaverse.fashion.studio.controller;
 
 import io.metaverse.fashion.studio.service.OutfitSuggestionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,19 +20,10 @@ public class OutfitSuggestionController {
     }
 
     @GetMapping("/suggest")
-    public ResponseEntity<String> suggestOutfit(
-            @RequestParam(required = false) String occasion,
-            @RequestParam(required = false) String gender,
-            @RequestParam(required = false, defaultValue = "all") String season,
-            @RequestParam(required = false) String prompt) throws IOException {
-        String json;
-        if (prompt != null && !prompt.isEmpty()) {
-            json = outfitSuggestionService.callGetOutfitSuggestionByPrompt(prompt);
-        } else if (occasion != null && gender != null) {
-            json = outfitSuggestionService.callGetOutfitSuggestion(occasion, gender, season);
-        } else {
-            return ResponseEntity.badRequest().body("{\"status\":\"error\",\"message\":\"Missing required parameters.\"}");
-        }
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
+    public String suggestOutfit(
+            @RequestParam String occasion,
+            @RequestParam String gender,
+            @RequestParam(required = false, defaultValue = "all") String season) throws IOException {
+        return outfitSuggestionService.callGetOutfitSuggestion(occasion, gender, season);
     }
 }
