@@ -12,3 +12,6 @@ joblib
 imagekitio
 rembg
 onnxruntime
+transformers
+accelerate
+spacy
