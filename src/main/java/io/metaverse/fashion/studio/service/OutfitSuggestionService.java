@@ -78,6 +78,45 @@ public class OutfitSuggestionService {
         }
     }
 
+    public String callGetOutfitSuggestionByPrompt(String prompt) throws IOException {
+        try {
+            logger.info("Executing enhanced Python script for prompt: {}", prompt);
+            ProcessBuilder pb = new ProcessBuilder(
+                    "python",
+                    pythonScriptPath,
+                    prompt
+            );
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            String processOutput = readStream(process.getInputStream());
+            logger.debug("Python script output:\n{}", processOutput);
+            if (!process.waitFor(1, TimeUnit.MINUTES)) {
+                process.destroy();
+                throw new RuntimeException("Python script timed out");
+            }
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("Python script failed: " + processOutput);
+            }
+            // Parse JSON response
+            JsonNode response;
+            try {
+                response = objectMapper.readTree(processOutput);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to parse Python script output: " + processOutput, e);
+            }
+            if (!response.path("status").asText().equals("success")) {
+                throw new RuntimeException(
+                        "Prediction failed: " + response.path("message").asText()
+                );
+            }
+            // Return the raw JSON string to the frontend
+            return processOutput;
+        } catch (IOException | InterruptedException e) {
+            logger.error("Error executing Python script: {}", e.getMessage(), e);
+            throw new RuntimeException("Python script execution failed", e);
+        }
+    }
+
     private String readStream(InputStream inputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             StringBuilder builder = new StringBuilder();
