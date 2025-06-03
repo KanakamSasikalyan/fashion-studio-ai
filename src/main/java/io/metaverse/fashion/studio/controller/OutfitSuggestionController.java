@@ -23,10 +23,18 @@ public class OutfitSuggestionController {
 
     @GetMapping("/suggest")
     public ResponseEntity<String> suggestOutfit(
-            @RequestParam String occasion,
-            @RequestParam String gender,
-            @RequestParam(required = false, defaultValue = "all") String season) throws IOException {
-        String json = outfitSuggestionService.callGetOutfitSuggestion(occasion, gender, season);
+            @RequestParam(required = false) String occasion,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false, defaultValue = "all") String season,
+            @RequestParam(required = false) String prompt) throws IOException {
+        String json;
+        if (prompt != null && !prompt.isEmpty()) {
+            json = outfitSuggestionService.callGetOutfitSuggestionByPrompt(prompt);
+        } else if (occasion != null && gender != null) {
+            json = outfitSuggestionService.callGetOutfitSuggestion(occasion, gender, season);
+        } else {
+            return ResponseEntity.badRequest().body("{\"status\":\"error\",\"message\":\"Missing required parameters.\"}");
+        }
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
     }
 }

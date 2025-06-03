@@ -214,10 +214,31 @@ class OutfitGenerator:
         return (gender, season, occasion)
 
     def _filter_items(self, gender: Gender, season: Season, occasion: Occasion) -> List[ClothingItem]:
-        return [item for item in self.clothing_items
-                if gender in item.genders
-                and season in item.seasons
-                and occasion in item.occasions]
+        # Always filter by gender strictly
+        filtered = [item for item in self.clothing_items
+                    if gender in item.genders
+                    and (season == Season.ALL or season in item.seasons)
+                    and (occasion == Occasion.OTHER or occasion in item.occasions)]
+        if filtered:
+            return filtered
+        # Relax: ignore season
+        filtered = [item for item in self.clothing_items
+                    if gender in item.genders
+                    and (occasion == Occasion.OTHER or occasion in item.occasions)]
+        if filtered:
+            return filtered
+        # Relax: ignore occasion
+        filtered = [item for item in self.clothing_items
+                    if gender in item.genders
+                    and (season == Season.ALL or season in item.seasons)]
+        if filtered:
+            return filtered
+        # Only gender match (strict)
+        filtered = [item for item in self.clothing_items if gender in item.genders]
+        if filtered:
+            return filtered
+        # If nothing found, return empty list (do not suggest cross-gender outfits)
+        return []
 
     def _get_color_palette(self, season: Season) -> List[str]:
         return self.seasonal_colors.get(season, self.seasonal_colors[Season.ALL])
