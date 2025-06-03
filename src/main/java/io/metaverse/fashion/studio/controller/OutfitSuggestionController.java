@@ -2,6 +2,8 @@ package io.metaverse.fashion.studio.controller;
 
 import io.metaverse.fashion.studio.service.OutfitSuggestionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,10 +22,11 @@ public class OutfitSuggestionController {
     }
 
     @GetMapping("/suggest")
-    public String suggestOutfit(
+    public ResponseEntity<String> suggestOutfit(
             @RequestParam String occasion,
             @RequestParam String gender,
             @RequestParam(required = false, defaultValue = "all") String season) throws IOException {
-        return outfitSuggestionService.callGetOutfitSuggestion(occasion, gender, season);
+        String json = outfitSuggestionService.callGetOutfitSuggestion(occasion, gender, season);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
     }
 }

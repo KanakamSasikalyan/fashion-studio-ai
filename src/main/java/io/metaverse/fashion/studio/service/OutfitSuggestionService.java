@@ -69,80 +69,14 @@ public class OutfitSuggestionService {
                 );
             }
 
-            // Build formatted response
-            StringBuilder result = new StringBuilder();
-            result.append("Main suggestion: ").append(response.path("outfitSuggestion").asText());
-
-            JsonNode alternatives = response.path("alternatives");
-            if (alternatives.isArray() && alternatives.size() > 0) {
-                result.append("\n\nAlternative options:\n");
-                for (JsonNode alt : alternatives) {
-                    result.append("- ").append(alt.asText()).append("\n");
-                }
-            }
-
-            return result.toString();
+            // Return the raw JSON string to the frontend
+            return processOutput;
 
         } catch (IOException | InterruptedException e) {
             logger.error("Error executing Python script: {}", e.getMessage(), e);
             throw new RuntimeException("Python script execution failed", e);
         }
     }
-
-//    public String getOutfitSuggestion(String occasion, String gender, String season) throws IOException {
-//        try {
-//            logger.info("Executing enhanced Python script for occasion: {}, gender: {}, season: {}",
-//                    occasion, gender, season);
-//
-//            ProcessBuilder pb = new ProcessBuilder(
-//                    "python",
-//                    pythonScriptPath,
-//                    occasion,
-//                    gender,
-//                    season
-//            );
-//
-//            pb.redirectErrorStream(true);
-//            Process process = pb.start();
-//
-//            String processOutput = readStream(process.getInputStream());
-//            logger.debug("Python script output:\n{}", processOutput);
-//
-//            if (!process.waitFor(1, TimeUnit.MINUTES)) {
-//                process.destroy();
-//                throw new RuntimeException("Python script timed out");
-//            }
-//
-//            if (process.exitValue() != 0) {
-//                throw new RuntimeException("Python script failed: " + processOutput);
-//            }
-//
-//            JsonNode response = objectMapper.readTree(processOutput);
-//            if (!response.path("status").asText().equals("success")) {
-//                throw new RuntimeException(
-//                        "Prediction failed: " + response.path("message").asText()
-//                );
-//            }
-//
-//            // Format the response with main suggestion and alternatives
-//            StringBuilder result = new StringBuilder();
-//            result.append("Main suggestion: ").append(response.path("outfitSuggestion").asText());
-//
-//            JsonNode alternatives = response.path("alternatives");
-//            if (alternatives.isArray() && alternatives.size() > 0) {
-//                result.append("\n\nAlternative options:\n");
-//                for (JsonNode alt : alternatives) {
-//                    result.append("- ").append(alt.asText()).append("\n");
-//                }
-//            }
-//
-//            return result.toString();
-//
-//        } catch (IOException | InterruptedException e) {
-//            logger.error("Error executing Python script: {}", e.getMessage(), e);
-//            throw new RuntimeException("Python script execution failed", e);
-//        }
-//    }
 
     private String readStream(InputStream inputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
