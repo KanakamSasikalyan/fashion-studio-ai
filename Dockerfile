@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY mvnw pom.xml ./ 
-COPY .mvn .mvn 
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
 COPY src src
 
 RUN chmod +x ./mvnw
@@ -40,6 +40,10 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Copy Python scripts and make them executable
 COPY src/main/resources/python/ src/main/resources/python/
 RUN chmod +x src/main/resources/python/*.py
+
+# Create model directory with proper permissions
+RUN mkdir -p /app/src/main/resources/python/model && \
+    chmod -R 777 /app/src/main/resources/python/model
 
 EXPOSE 80
 
