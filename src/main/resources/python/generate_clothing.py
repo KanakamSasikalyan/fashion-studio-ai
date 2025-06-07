@@ -39,14 +39,14 @@ def cleanup_resources():
         import torch
         torch.cuda.empty_cache()
 
-def load_optimized_model(model_id="runwayml/stable-diffusion-v1-5"):
+def load_optimized_model(model_id="microsoft/sd-v1-4-onnx"):
     """
-    Load an optimized Stable Diffusion model for CPU inference using ONNX.
+    Load ONNX-optimized Stable Diffusion model for CPU inference.
     """
     from diffusers import OnnxStableDiffusionPipeline, OnnxRuntimeModel, DDIMScheduler
     from transformers import CLIPTokenizer
 
-    logger.info("Loading model components...")
+    logger.info("Loading ONNX model components...")
     providers = ["CPUExecutionProvider"]
 
     scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
@@ -56,7 +56,7 @@ def load_optimized_model(model_id="runwayml/stable-diffusion-v1-5"):
     vae_decoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_decoder", provider=providers[0])
     vae_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_encoder", provider=providers[0])
 
-    logger.info("Creating Stable Diffusion pipeline...")
+    logger.info("Creating ONNX Stable Diffusion pipeline...")
     pipe = OnnxStableDiffusionPipeline(
         vae_encoder=vae_encoder,
         vae_decoder=vae_decoder,
@@ -89,7 +89,7 @@ def main():
         log_hardware_info()
         print("PROGRESS:10", flush=True)
 
-        logger.info("Loading optimized Stable Diffusion pipeline...")
+        logger.info("Loading optimized Stable Diffusion ONNX pipeline...")
         print("PROGRESS:20", flush=True)
         load_start = time.time()
         pipe = load_optimized_model()
