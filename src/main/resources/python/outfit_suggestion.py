@@ -48,6 +48,21 @@ def train_model():
         data = data[data['outfit'].isin(valid_classes)]
         logger.info(f"Dataset size after removing rare classes: {len(data)} rows")
 
+        # Check if we have enough samples per class
+        min_samples_per_class = 2
+        class_counts = data['outfit'].value_counts()
+        if len(class_counts) == 0 or any(class_counts < min_samples_per_class):
+            raise ValueError(f"Not enough samples per class. Need at least {min_samples_per_class} samples per class.")
+
+        # Adjust test_size if dataset is too small
+        test_size = 0.2
+        min_test_size = len(class_counts)  # Need at least one sample per class in test set
+        if len(data) * test_size < min_test_size:
+            test_size = min_test_size / len(data)
+            if test_size >= 1.0:
+                raise ValueError("Dataset too small for proper training and testing")
+            logger.info(f"Adjusting test_size to {test_size:.2f} due to small dataset")
+
         data['input_text'] = data['occasion_text'] + ' ' + data['gender'] + ' ' + data['season']
 
         classes = np.unique(data['outfit'])
@@ -56,7 +71,7 @@ def train_model():
 
         X_train, X_test, y_train, y_test = train_test_split(
             data['input_text'], data['outfit'],
-            test_size=0.2,
+            test_size=test_size,
             random_state=42,
             stratify=data['outfit']
         )
@@ -94,7 +109,14 @@ def train_model():
 
     except Exception as e:
         logger.error(f"Training failed: {str(e)}")
-        raise
+        error_result = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_result), file=sys.stdout)
+        sys.exit(1)
+
+# ... rest of the file remains the same ...
 
 def predict_outfit(prompt, gender, season='all'):
     try:
