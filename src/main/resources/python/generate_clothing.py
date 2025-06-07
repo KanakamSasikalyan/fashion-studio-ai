@@ -67,16 +67,35 @@ def main():
         print("PROGRESS:10", flush=True)
         load_start = time.time()
 
-        from diffusers import OnnxStableDiffusionPipeline
+        from diffusers import OnnxStableDiffusionPipeline, OnnxRuntimeModel
         import torch
 
         # Use smaller model and ONNX runtime
         model_id = "runwayml/stable-diffusion-v1-5"
-        pipe = OnnxStableDiffusionPipeline.from_pretrained(
-            model_id,
-            provider="CPUExecutionProvider",
+
+        # Load components separately
+        logger.info("Loading individual components...")
+        from diffusers import DDIMScheduler
+        from transformers import CLIPTextModel, CLIPTokenizer
+
+        # Initialize components
+        scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
+        text_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="text_encoder")
+        tokenizer = CLIPTokenizer.from_pretrained(model_id, subfolder="tokenizer")
+        unet = OnnxRuntimeModel.from_pretrained(model_id, subfolder="unet")
+        vae_decoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_decoder")
+        vae_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_encoder")
+
+        # Create pipeline with all required components
+        pipe = OnnxStableDiffusionPipeline(
+            vae_encoder=vae_encoder,
+            vae_decoder=vae_decoder,
+            text_encoder=text_encoder,
+            tokenizer=tokenizer,
+            unet=unet,
+            scheduler=scheduler,
             safety_checker=None,
-            torch_dtype=torch.float32
+            feature_extractor=None
         )
 
         logger.info(f"Model loaded in {time.time() - load_start:.2f}s")
