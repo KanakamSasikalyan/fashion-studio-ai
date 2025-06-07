@@ -28,15 +28,9 @@ imagekit = ImageKit(
 
 def log_hardware_info():
     import psutil
-    import torch
-
     logger.info(f"Python version: {sys.version}")
     logger.info(f"System CPUs: {psutil.cpu_count()}")
     logger.info(f"Available RAM: {psutil.virtual_memory().available / (1024**3):.2f} GB")
-    logger.info(f"CUDA Available: {torch.cuda.is_available()}")
-    if torch.cuda.is_available():
-        logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
-        logger.info(f"GPU Memory: {torch.cuda.mem_get_info()[1] / (1024**3):.2f} GB")
 
 def cleanup_resources():
     """Force cleanup of resources and memory"""
@@ -44,6 +38,38 @@ def cleanup_resources():
     if 'torch' in sys.modules:
         import torch
         torch.cuda.empty_cache()
+
+def load_optimized_model(model_id="runwayml/stable-diffusion-v1-5"):
+    """Load an optimized model for CPU inference"""
+    from diffusers import OnnxStableDiffusionPipeline
+    from diffusers import DDIMScheduler
+    from transformers import CLIPTokenizer
+
+    # Use OpenVINO provider for better CPU performance
+    providers = ["CPUExecutionProvider"]
+
+    # Load components with optimized settings
+    scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
+    tokenizer = CLIPTokenizer.from_pretrained(model_id, subfolder="tokenizer")
+
+    # Create optimized pipeline
+    pipe = OnnxStableDiffusionPipeline.from_pretrained(
+        model_id,
+        provider=providers[0],
+        scheduler=scheduler,
+        tokenizer=tokenizer,
+        safety_checker=None,
+        feature_extractor=None,
+        torch_dtype=None,  # Not needed for ONNX
+        use_onnx_optimization=True,
+        local_files_only=False
+    )
+
+    # Additional optimizations
+    pipe.unet.set_use_memory_efficient_attention(True)
+    pipe.vae.set_use_memory_efficient_attention(True)
+
+    return pipe
 
 def main():
     try:
@@ -59,64 +85,50 @@ def main():
 
         # Hardware check
         log_hardware_info()
-        print("PROGRESS:5", flush=True)
-
-        # Model loading - Using standard pipeline for compatibility
-        logger.info("Loading Stable Diffusion pipeline...")
         print("PROGRESS:10", flush=True)
+
+        # Model loading - Optimized for CPU
+        logger.info("Loading optimized Stable Diffusion pipeline...")
+        print("PROGRESS:20", flush=True)
         load_start = time.time()
 
-        from diffusers import StableDiffusionPipeline
-        import torch
-
-        # Use standard pipeline instead of ONNX for better compatibility
-        pipe = StableDiffusionPipeline.from_pretrained(
-            "runwayml/stable-diffusion-v1-5",
-            torch_dtype=torch.float32,
-            safety_checker=None
-        ).to("cuda" if torch.cuda.is_available() else "cpu")
+        pipe = load_optimized_model()
 
         logger.info(f"Model loaded in {time.time() - load_start:.2f}s")
-        print("PROGRESS:30", flush=True)
+        print("PROGRESS:40", flush=True)
 
         # Image generation with optimized parameters
-        logger.info("Generating image (steps=20, size=512x512)...")
-        print("PROGRESS:40", flush=True)
+        logger.info("Generating image (steps=15, size=384x384)...")
+        print("PROGRESS:50", flush=True)
         gen_start = time.time()
 
-        # Optimized prompt with negative prompts to improve quality
-        temp_prompt = f"{prompt}, {gender} fashion, high quality clothing, detailed texture"
+        # Optimized prompt
+        temp_prompt = f"{prompt}, {gender} fashion, {style} style, high quality clothing texture"
         negative_prompt = "low quality, blurry, text, watermark, face, person, human, body"
 
-        # Generate with standard resolution
+        # Generate with optimized settings
         image = pipe(
             temp_prompt,
             negative_prompt=negative_prompt,
-            num_inference_steps=20,
-            height=512,
-            width=512,
-            guidance_scale=7.5
+            num_inference_steps=15,  # Reduced steps for faster generation
+            height=384,  # Smaller size for faster generation
+            width=384,
+            guidance_scale=7.0  # Slightly reduced for speed
         ).images[0]
 
         logger.info(f"Generation completed in {time.time() - gen_start:.2f}s")
-        print("PROGRESS:70", flush=True)
+        print("PROGRESS:80", flush=True)
 
-        # Save temporary file
+        # Save and upload
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"design_{timestamp}_{abs(hash(prompt)) % 1000000}.png"
         output_path = os.path.join(output_dir, filename)
         image.save(output_path)
-        logger.info(f"Temporary image saved to: {output_path}")
-        print("PROGRESS:80", flush=True)
-
-        # Clean up model resources
-        del pipe
-        cleanup_resources()
 
         # Upload to ImageKit
         logger.info("Uploading to ImageKit...")
-        print("PROGRESS:85", flush=True)
+        print("PROGRESS:90", flush=True)
         upload = imagekit.upload_file(
             file=open(output_path, "rb"),
             file_name=filename,
@@ -130,14 +142,7 @@ def main():
             raise Exception("ImageKit upload failed")
 
         image_url = upload.url
-        logger.info(f"Image uploaded to ImageKit: {image_url}")
-        print("PROGRESS:95", flush=True)
-
-        # Clean up temporary file
         os.remove(output_path)
-        logger.info(f"Temporary file removed: {output_path}")
-
-        # Return just the URL to Java
         print(image_url, flush=True)
         print("PROGRESS:100", flush=True)
 

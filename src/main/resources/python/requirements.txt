@@ -16,3 +16,4 @@ transformers
 accelerate
 spacy
 huggingface-hub
+openvino==2023.0.0  # For additional CPU optimizations
