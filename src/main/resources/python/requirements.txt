@@ -1,17 +1,19 @@
-torch==2.0.0
-diffusers==0.16.1
-transformers==4.28.1
-onnxruntime==1.14.1
+torch
 numpy
 Pillow
+diffusers
 psutil
 cloudinary
-opencv-python-headless
+opencv-python
 websockets
 pandas
 scikit-learn
 joblib
 imagekitio
 rembg
+onnxruntime
+transformers
 accelerate
 spacy
+huggingface-hub
+openvino==2023.0.0  # For additional CPU optimizations
