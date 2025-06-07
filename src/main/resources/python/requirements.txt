@@ -1,7 +1,14 @@
-torch
-numpy
-Pillow
-diffusers
+torch==2.0.1
+diffusers==0.16.1
+transformers==4.28.1
+onnxruntime==1.14.1
+huggingface-hub==0.13.4
+numpy>=1.21.0
+Pillow>=9.0.0
+psutil>=5.8.0
+imagekitio>=2.2.9
+accelerate>=0.18.0
+openvino==2023.0.0
 psutil
 cloudinary
 opencv-python
@@ -9,11 +16,6 @@ websockets
 pandas
 scikit-learn
 joblib
-imagekitio
 rembg
-onnxruntime
-transformers
 accelerate
 spacy
-huggingface-hub
-openvino==2023.0.0  # For additional CPU optimizations

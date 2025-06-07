@@ -40,34 +40,44 @@ def cleanup_resources():
         torch.cuda.empty_cache()
 
 def load_optimized_model(model_id="runwayml/stable-diffusion-v1-5"):
-    """Load an optimized model for CPU inference"""
-    from diffusers import OnnxStableDiffusionPipeline
+    """Load an optimized model for CPU inference with all required components"""
+    from diffusers import OnnxStableDiffusionPipeline, OnnxRuntimeModel
     from diffusers import DDIMScheduler
     from transformers import CLIPTokenizer
 
-    # Use OpenVINO provider for better CPU performance
+    # Use CPU execution provider
     providers = ["CPUExecutionProvider"]
 
-    # Load components with optimized settings
+    logger.info("Loading model components...")
+
+    # Load all required components individually
     scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(model_id, subfolder="tokenizer")
 
-    # Create optimized pipeline
-    pipe = OnnxStableDiffusionPipeline.from_pretrained(
-        model_id,
-        provider=providers[0],
-        scheduler=scheduler,
+    # Load ONNX models
+    text_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="text_encoder", provider=providers[0])
+    unet = OnnxRuntimeModel.from_pretrained(model_id, subfolder="unet", provider=providers[0])
+    vae_decoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_decoder", provider=providers[0])
+    vae_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_encoder", provider=providers[0])
+
+    logger.info("Creating pipeline with all components...")
+
+    # Create pipeline with all required components
+    pipe = OnnxStableDiffusionPipeline(
+        vae_encoder=vae_encoder,
+        vae_decoder=vae_decoder,
+        text_encoder=text_encoder,
         tokenizer=tokenizer,
+        unet=unet,
+        scheduler=scheduler,
         safety_checker=None,
         feature_extractor=None,
-        torch_dtype=None,  # Not needed for ONNX
-        use_onnx_optimization=True,
-        local_files_only=False
+        requires_safety_checker=False
     )
 
-    # Additional optimizations
-    pipe.unet.set_use_memory_efficient_attention(True)
-    pipe.vae.set_use_memory_efficient_attention(True)
+    # Enable memory efficient attention
+    if hasattr(pipe, "enable_attention_slicing"):
+        pipe.enable_attention_slicing()
 
     return pipe
 
@@ -110,10 +120,10 @@ def main():
         image = pipe(
             temp_prompt,
             negative_prompt=negative_prompt,
-            num_inference_steps=15,  # Reduced steps for faster generation
-            height=384,  # Smaller size for faster generation
+            num_inference_steps=15,
+            height=384,
             width=384,
-            guidance_scale=7.0  # Slightly reduced for speed
+            guidance_scale=7.0
         ).images[0]
 
         logger.info(f"Generation completed in {time.time() - gen_start:.2f}s")
