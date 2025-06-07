@@ -24,7 +24,7 @@ WORKDIR /app
 # Copy the application JAR file into the container
 COPY --from=builder /app/target/*.jar app.jar
 
-# Install Python and required dependencies
+# Install Python and required system dependencies
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -36,6 +36,9 @@ RUN apt-get update && apt-get install -y \
 # Ensure Python dependencies are installed
 COPY src/main/resources/python/requirements.txt requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
+
+# ✅ Download the spaCy model 'en_core_web_sm'
+RUN python -m spacy download en_core_web_sm
 
 # Copy Python scripts and make them executable
 COPY src/main/resources/python/ src/main/resources/python/
