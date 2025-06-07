@@ -40,29 +40,23 @@ def cleanup_resources():
         torch.cuda.empty_cache()
 
 def load_optimized_model(model_id="runwayml/stable-diffusion-v1-5"):
-    """Load an optimized model for CPU inference with all required components"""
-    from diffusers import OnnxStableDiffusionPipeline, OnnxRuntimeModel
-    from diffusers import DDIMScheduler
+    """
+    Load an optimized Stable Diffusion model for CPU inference using ONNX.
+    """
+    from diffusers import OnnxStableDiffusionPipeline, OnnxRuntimeModel, DDIMScheduler
     from transformers import CLIPTokenizer
 
-    # Use CPU execution provider
+    logger.info("Loading model components...")
     providers = ["CPUExecutionProvider"]
 
-    logger.info("Loading model components...")
-
-    # Load all required components individually
     scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(model_id, subfolder="tokenizer")
-
-    # Load ONNX models
     text_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="text_encoder", provider=providers[0])
     unet = OnnxRuntimeModel.from_pretrained(model_id, subfolder="unet", provider=providers[0])
     vae_decoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_decoder", provider=providers[0])
     vae_encoder = OnnxRuntimeModel.from_pretrained(model_id, subfolder="vae_encoder", provider=providers[0])
 
-    logger.info("Creating pipeline with all components...")
-
-    # Create pipeline with all required components
+    logger.info("Creating Stable Diffusion pipeline...")
     pipe = OnnxStableDiffusionPipeline(
         vae_encoder=vae_encoder,
         vae_decoder=vae_decoder,
@@ -75,7 +69,6 @@ def load_optimized_model(model_id="runwayml/stable-diffusion-v1-5"):
         requires_safety_checker=False
     )
 
-    # Enable memory efficient attention
     if hasattr(pipe, "enable_attention_slicing"):
         pipe.enable_attention_slicing()
 
@@ -86,39 +79,33 @@ def main():
         start_time = time.time()
         logger.info("=== New Generation Request ===")
 
-        # Parse arguments
+        # Parse CLI arguments
         prompt = sys.argv[1].strip('"')
         style = sys.argv[2]
         gender = sys.argv[3]
         output_dir = sys.argv[4]
         logger.info(f"Prompt: '{prompt}' | Style: {style} | Gender: {gender}")
 
-        # Hardware check
         log_hardware_info()
         print("PROGRESS:10", flush=True)
 
-        # Model loading - Optimized for CPU
         logger.info("Loading optimized Stable Diffusion pipeline...")
         print("PROGRESS:20", flush=True)
         load_start = time.time()
-
         pipe = load_optimized_model()
-
         logger.info(f"Model loaded in {time.time() - load_start:.2f}s")
         print("PROGRESS:40", flush=True)
 
-        # Image generation with optimized parameters
+        # Generate image
         logger.info("Generating image (steps=15, size=384x384)...")
         print("PROGRESS:50", flush=True)
         gen_start = time.time()
 
-        # Optimized prompt
-        temp_prompt = f"{prompt}, {gender} fashion, {style} style, high quality clothing texture"
+        formatted_prompt = f"{prompt}, {gender} fashion, {style} style, high quality clothing texture"
         negative_prompt = "low quality, blurry, text, watermark, face, person, human, body"
 
-        # Generate with optimized settings
         image = pipe(
-            temp_prompt,
+            formatted_prompt,
             negative_prompt=negative_prompt,
             num_inference_steps=15,
             height=384,
@@ -126,10 +113,10 @@ def main():
             guidance_scale=7.0
         ).images[0]
 
-        logger.info(f"Generation completed in {time.time() - gen_start:.2f}s")
+        logger.info(f"Image generated in {time.time() - gen_start:.2f}s")
         print("PROGRESS:80", flush=True)
 
-        # Save and upload
+        # Save to disk
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"design_{timestamp}_{abs(hash(prompt)) % 1000000}.png"
