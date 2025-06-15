@@ -30,7 +30,7 @@ public class DesignController {
     public ResponseEntity<?> generateDesign(
             @RequestParam String prompt,
             @RequestParam(defaultValue = "casual") String style,
-            @RequestParam(defaultValue = "man") String gender
+            @RequestParam(defaultValue = "male") String gender
     ) {
         try {
             String decodedPrompt = URLDecoder.decode(prompt, StandardCharsets.UTF_8);

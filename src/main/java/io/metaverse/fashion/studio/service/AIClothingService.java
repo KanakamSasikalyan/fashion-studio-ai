@@ -123,9 +123,14 @@ public class AIClothingService {
 
                                 // Store image in database using JPA repository
                                 ClothingDesign design = new ClothingDesign();
-                                design.setPrompt(prompt);
+
+                                int hashCode = prompt.hashCode();
+
+                                String head = "ClothingDesign#"+String.valueOf(hashCode);
+
+                                design.setPrompt(head);
                                 design.setStyle(style);
-                                design.setImageUrl(gender);
+                                design.setGender(gender);
                                 design.setImageUrl(imageUrl);
 
                                 log.debug("Attempting to save design to database");
