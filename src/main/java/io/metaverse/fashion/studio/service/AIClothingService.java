@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AIClothingService {
@@ -121,13 +122,9 @@ public class AIClothingService {
                                 log.info("Image generation completed...");
                                 log.info("Trying to save the imageUrl into database...");
 
-                                // Store image in database using JPA repository
                                 ClothingDesign design = new ClothingDesign();
-
                                 int hashCode = prompt.hashCode();
-
                                 String head = "ClothingDesign#"+String.valueOf(hashCode);
-
                                 design.setPrompt(head);
                                 design.setStyle(style);
                                 design.setGender(gender);
@@ -136,7 +133,6 @@ public class AIClothingService {
                                 log.debug("Attempting to save design to database");
                                 ClothingDesign savedDesign = clothingDesignRepository.save(design);
                                 log.info("Design successfully saved to database with ID: {}", savedDesign.getId());
-
 
                                 emitter.next(ServerSentEvent.builder("COMPLETE:" + imageUrl).build());
                             } else if (line.startsWith("ERROR")) {
@@ -150,6 +146,15 @@ public class AIClothingService {
                     log.error("Error in generateClothingDesignStream", e);
                     emitter.next(ServerSentEvent.builder("ERROR:" + e.getMessage()).build());
                     emitter.complete();
+                } finally {
+                    executor.shutdown();
+                    try {
+                        if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                            executor.shutdownNow();
+                        }
+                    } catch (InterruptedException e) {
+                        executor.shutdownNow();
+                    }
                 }
             });
         }, FluxSink.OverflowStrategy.BUFFER);
