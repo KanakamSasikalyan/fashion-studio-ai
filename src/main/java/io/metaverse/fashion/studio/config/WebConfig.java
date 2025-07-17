@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://frontend-fashion-studio-ai-afesbjb9h8gbbmh0.centralus-01.azurewebsites.net", "http://localhost:3000")
+                        .allowedOrigins("https://frontend-fashion-stuido-ai-ubc-ahenfechfgg6ewa4.centralus-01.azurewebsites.net", "http://localhost:3000")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
