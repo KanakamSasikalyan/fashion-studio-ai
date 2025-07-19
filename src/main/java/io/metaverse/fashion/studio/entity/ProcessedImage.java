@@ -1,5 +1,5 @@
 package io.metaverse.fashion.studio.entity;
-// ProcessedImage.java
+// ProcessedImage.java - the functionality is not begin used in the application #removed - no more required
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
