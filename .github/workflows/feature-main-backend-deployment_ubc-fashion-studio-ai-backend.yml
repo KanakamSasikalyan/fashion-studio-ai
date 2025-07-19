@@ -9,43 +9,52 @@ on:
       - feature/main-backend-deployment
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: 'ubc-fashion-studio-ai-backend'
+  AZURE_WEBAPP_SLOT: 'production'
+  CONTAINER_REGISTRY: 'ghcr.io'
+  CONTAINER_USERNAME: ${{ secrets.AzureAppService_ContainerUsername_471cceedd7fa4c44955901bad9519b38 }}
+  CONTAINER_PASSWORD: ${{ secrets.AzureAppService_ContainerPassword_9bbf5c01358043038f88a791959a6c93 }}
+
 jobs:
-  build:
-    runs-on: 'ubuntu-latest'
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: 'production'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Set lowercase REPO_NAME
+        run: echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Log in to registry
         uses: docker/login-action@v2
         with:
           registry: https://ghcr.io/
-          username: ${{ secrets.AzureAppService_ContainerUsername_471cceedd7fa4c44955901bad9519b38 }}
-          password: ${{ secrets.AzureAppService_ContainerPassword_9bbf5c01358043038f88a791959a6c93 }}
+          username: ${{ env.CONTAINER_USERNAME }}
+          password: ${{ env.CONTAINER_PASSWORD }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_471cceedd7fa4c44955901bad9519b38 }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}
+          tags: ghcr.io/${{ env.CONTAINER_USERNAME }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}
           file: ./Dockerfile
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'ubc-fashion-studio-ai-backend'
-          slot-name: 'production'
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: ${{ env.AZURE_WEBAPP_SLOT }}
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_8542be066ca04aa385b99143408e2c89 }}
-          images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_471cceedd7fa4c44955901bad9519b38 }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}'
+          images: ghcr.io/${{ env.CONTAINER_USERNAME }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}
