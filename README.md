@@ -50,4 +50,4 @@ The primary goal of this project is to provide a platform where users can input 
 
 
 ## Author
-Kalyan
+- Kalyan
