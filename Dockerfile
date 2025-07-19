@@ -48,6 +48,10 @@ RUN chmod +x src/main/resources/python/*.py
 RUN mkdir -p /app/src/main/resources/python/model && \
     chmod -R 777 /app/src/main/resources/python/model
 
+# Ensure the application listens on port 80
+ENV PORT=80
+
 EXPOSE 80
 
-ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=${PORT}"]
+# Update the ENTRYPOINT to pass the port explicitly
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=80"]
