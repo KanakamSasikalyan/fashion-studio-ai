@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://ghcr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_7ece4b13b4b44369a29ff18c36f664c3 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_3c79970479684195b04848fea5d5b006 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_f8af83f9dd1b4f49828534cf37fa2de3 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_4b6e1ebd23da4cd1b685e7692fddddd0 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_7ece4b13b4b44369a29ff18c36f664c3 }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}
+        tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_f8af83f9dd1b4f49828534cf37fa2de3 }}/ghcr.io/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'ubc-fashion-studio-ai-backend'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_30631e7526934672998a9bee58519db1 }}
-        images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_7ece4b13b4b44369a29ff18c36f664c3 }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_45bfeb74576a4c568ef9997e88b58484 }}
+        images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_f8af83f9dd1b4f49828534cf37fa2de3 }}/ghcr.io/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}'
