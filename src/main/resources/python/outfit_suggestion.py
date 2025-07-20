@@ -1,335 +1,193 @@
 import sys
+import pandas as pd
+import joblib
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 import json
-import logging
-import requests
 import os
-import time
-import re
-from dotenv import load_dotenv
+import logging
+import numpy as np
+from sklearn.utils.class_weight import compute_class_weight
 
-# Load Hugging Face token (optional)
-load_dotenv()
-HF_TOKEN = os.getenv("HF_API_KEY")  # Optional, can be left blank for public access
-
-# Logger setup with safer configuration
+# Configure logging to stderr only
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(sys.stderr)]
+    handlers=[logging.StreamHandler(sys.stderr)]  # Only stderr for logs
 )
 logger = logging.getLogger(__name__)
 
-# ✅ Updated with completely public models that don't require authentication
-FALLBACK_MODELS = [
-    "gpt2",  # Always public and available
-    "distilgpt2",  # Smaller, faster version
-    "microsoft/DialoGPT-small"  # Keep as backup but may fail
-]
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, 'model')
+os.makedirs(MODEL_DIR, exist_ok=True)
 
-# Construct headers WITHOUT authentication for public models
-HEADERS = {
-    "Content-Type": "application/json",
-    "User-Agent": "Fashion-Studio-AI/1.0"
-}
-# Remove authentication header completely for public access
-# if HF_TOKEN:
-#     HEADERS["Authorization"] = f"Bearer {HF_TOKEN}"
+MODEL_PATH = os.path.join(MODEL_DIR, 'enhanced_outfit_model.pkl')
+DATA_PATH = os.path.join(BASE_DIR, 'enhanced_outfit_dataset.csv')
 
-def sanitize_for_logging(text, max_length=100):
-    """Sanitize text for safe logging by removing sensitive information"""
-    if not text:
-        return "[empty]"
-    
-    # Remove potential API keys, tokens, or sensitive data patterns
-    sanitized = re.sub(r'Bearer\s+[\w\-\.]+', 'Bearer [REDACTED]', str(text))
-    sanitized = re.sub(r'token["\s:]+[\w\-\.]+', 'token": "[REDACTED]"', sanitized)
-    sanitized = re.sub(r'key["\s:]+[\w\-\.]+', 'key": "[REDACTED]"', sanitized)
-    
-    # Truncate if too long
-    if len(sanitized) > max_length:
-        sanitized = sanitized[:max_length] + "...[truncated]"
-    
-    return sanitized
+def preprocess_data(data):
+    data = data.dropna()
+    data = data[data['outfit'].str.strip() != '']
+    data = data[data['gender'].isin(['male', 'female', 'unisex'])]
+    return data
 
-def try_model_with_fallback(prompt, model_url, max_retries=1):  # Reduced retries
-    """Try a model with retry logic"""
-    for attempt in range(max_retries):
-        try:
-            # Simplified payload for public models
-            payload = {
-                "inputs": prompt,
-                "parameters": {
-                    "max_length": 100,
-                    "temperature": 0.8,
-                    "do_sample": True
-                },
-                "options": {
-                    "wait_for_model": True,
-                    "use_cache": True
-                }
-            }
-
-            logger.info(f"Attempting public API call to model (attempt {attempt + 1})")
-            
-            response = requests.post(
-                model_url,
-                headers=HEADERS,
-                json=payload,
-                timeout=30
-            )
-
-            logger.info(f"API response status: {response.status_code}")
-            
-            if response.status_code == 200:
-                result = response.json()
-                if result and (isinstance(result, list) or isinstance(result, dict)):
-                    return result
-                else:
-                    logger.warning("Invalid response format received")
-                    return None
-            elif response.status_code == 503:
-                logger.info("Model is loading, waiting 10 seconds...")
-                time.sleep(10)
-                continue
-            elif response.status_code == 401:
-                logger.info("Model requires authentication, skipping...")
-                return None  # Skip this model immediately
-            elif response.status_code == 429:
-                logger.info("Rate limit hit, skipping model...")
-                return None  # Don't wait, just skip
-            else:
-                error_msg = sanitize_for_logging(response.text)
-                logger.warning(f"API error {response.status_code}: {error_msg}")
-                return None
-                
-        except requests.exceptions.Timeout:
-            logger.warning(f"Request timeout (attempt {attempt + 1})")
-        except requests.exceptions.RequestException as e:
-            logger.warning(f"Request failed (attempt {attempt + 1}): {sanitize_for_logging(str(e))}")
-        except Exception as e:
-            logger.warning(f"Unexpected error (attempt {attempt + 1}): {sanitize_for_logging(str(e))}")
-    
-    return None
-
-def create_fashion_prompt(occasion, gender, season):
-    """Create a structured prompt for fashion advice"""
-    # Simplified prompt for better model compatibility
-    return f"Suggest a {gender} outfit for {occasion} in {season} season. Include top, bottom, shoes."
-
-def parse_model_response(raw_output, occasion, gender, season):
-    """Parse model response and create structured output"""
+def train_model():
     try:
-        # Handle different response formats
-        response_text = ""
-        
-        if isinstance(raw_output, list) and len(raw_output) > 0:
-            if isinstance(raw_output[0], dict):
-                if "generated_text" in raw_output[0]:
-                    response_text = raw_output[0]["generated_text"]
-                elif "text" in raw_output[0]:
-                    response_text = raw_output[0]["text"]
-                else:
-                    response_text = str(raw_output[0])
-            else:
-                response_text = str(raw_output[0])
-        elif isinstance(raw_output, dict):
-            if "generated_text" in raw_output:
-                response_text = raw_output["generated_text"]
-            elif "text" in raw_output:
-                response_text = raw_output["text"]
-            else:
-                response_text = str(raw_output)
-        else:
-            response_text = str(raw_output)
-        
-        # Clean and extract meaningful content
-        if response_text:
-            # Remove the original prompt if it's echoed back
-            prompt_text = f"Suggest a {gender} outfit for {occasion} in {season} season"
-            if prompt_text in response_text:
-                response_text = response_text.replace(prompt_text, "").strip()
-            
-            # Split into sentences and take meaningful ones
-            sentences = [s.strip() for s in response_text.split('.') if s.strip()]
-            meaningful_sentences = [s for s in sentences if len(s) > 10 and any(word in s.lower() for word in ['wear', 'dress', 'shirt', 'pants', 'shoes', 'jacket', 'outfit'])]
-            
-            if meaningful_sentences:
-                main_suggestion = meaningful_sentences[0] + "."
-                alternatives = [s + "." for s in meaningful_sentences[1:3]] if len(meaningful_sentences) > 1 else ["Add appropriate accessories", "Consider weather-appropriate layers"]
-            else:
-                # Create a basic response from the text
-                main_suggestion = response_text[:100].strip() + "..." if len(response_text) > 100 else response_text.strip()
-                alternatives = ["Consider adding accessories", "Choose weather-appropriate options"]
-        else:
-            raise ValueError("Empty response received")
-        
-        return {
-            "main_suggestion": main_suggestion if main_suggestion else f"Smart casual attire for {occasion}",
-            "alternatives": alternatives,
-            "confidence_score": 0.75
-        }
-        
+        logger.info(f"Loading enhanced data from: {DATA_PATH}")
+        data = pd.read_csv(DATA_PATH)
+        logger.info(f"Initial dataset size: {len(data)} rows")
+
+        data = preprocess_data(data)
+        logger.info(f"Dataset size after preprocessing: {len(data)} rows")
+
+        # Remove classes with fewer than 2 samples
+        class_counts = data['outfit'].value_counts()
+        valid_classes = class_counts[class_counts >= 2].index
+        data = data[data['outfit'].isin(valid_classes)]
+        logger.info(f"Dataset size after removing rare classes: {len(data)} rows")
+
+        # Check if we have enough samples per class
+        min_samples_per_class = 2
+        class_counts = data['outfit'].value_counts()
+        if len(class_counts) == 0 or any(class_counts < min_samples_per_class):
+            raise ValueError(f"Not enough samples per class. Need at least {min_samples_per_class} samples per class.")
+
+        # Adjust test_size if dataset is too small
+        test_size = 0.2
+        min_test_size = len(class_counts)  # Need at least one sample per class in test set
+        if len(data) * test_size < min_test_size:
+            test_size = min_test_size / len(data)
+            if test_size >= 1.0:
+                raise ValueError("Dataset too small for proper training and testing")
+            logger.info(f"Adjusting test_size to {test_size:.2f} due to small dataset")
+
+        data['input_text'] = data['occasion_text'] + ' ' + data['gender'] + ' ' + data['season']
+
+        classes = np.unique(data['outfit'])
+        weights = compute_class_weight('balanced', classes=classes, y=data['outfit'])
+        class_weights = dict(zip(classes, weights))
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            data['input_text'], data['outfit'],
+            test_size=test_size,
+            random_state=42,
+            stratify=data['outfit']
+        )
+
+        pipeline = Pipeline([
+            ('tfidf', TfidfVectorizer(
+                ngram_range=(1, 3),
+                stop_words='english',
+                max_features=15000,
+                min_df=2,
+                max_df=0.95
+            )),
+            ('clf', RandomForestClassifier(
+                n_estimators=200,
+                max_depth=20,
+                min_samples_split=5,
+                class_weight=class_weights,
+                random_state=42,
+                n_jobs=-1
+            ))
+        ])
+
+        logger.info("Starting model training...")
+        pipeline.fit(X_train, y_train)
+
+        train_score = pipeline.score(X_train, y_train)
+        test_score = pipeline.score(X_test, y_test)
+        logger.info(f"Training accuracy: {train_score:.2f}, Test accuracy: {test_score:.2f}")
+
+        y_pred = pipeline.predict(X_test)
+        logger.info("Classification Report:\n" + classification_report(y_test, y_pred))
+
+        joblib.dump(pipeline, MODEL_PATH)
+        logger.info("Enhanced model training completed successfully")
+
     except Exception as e:
-        logger.warning(f"Response parsing failed: {sanitize_for_logging(str(e))}")
-        # Return structured fallback response
-        return create_fallback_response(occasion, gender, season)
+        logger.error(f"Training failed: {str(e)}")
+        error_result = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_result), file=sys.stdout)
+        sys.exit(1)
 
-def create_fallback_response(occasion, gender, season):
-    """Create a structured fallback response with more detailed suggestions"""
-    occasion_lower = occasion.lower()
-    season_lower = season.lower()
-    
-    # Enhanced outfit suggestions based on occasion and season
-    if 'wedding' in occasion_lower:
-        if gender.lower() in ['male', 'man', 'men']:
-            if season_lower in ['summer', 'spring']:
-                main = "Light gray or navy suit with white dress shirt, silk tie, and brown leather dress shoes"
-                alternatives = ["Linen blend suit for comfort", "Add a boutonniere and pocket square"]
-            else:
-                main = "Charcoal or navy three-piece suit with white dress shirt, conservative tie, and black leather dress shoes"
-                alternatives = ["Dark wool suit with matching vest", "Add cufflinks and dress watch"]
-        else:
-            if season_lower in ['summer', 'spring']:
-                main = "Floral midi dress or elegant jumpsuit with block heels and delicate jewelry"
-                alternatives = ["Pastel colored dress with nude heels", "Wrap dress with statement earrings"]
-            else:
-                main = "Sophisticated cocktail dress or dressy pantsuit with heels and classic jewelry"
-                alternatives = ["Velvet dress with pumps", "Silk blouse with dress pants and blazer"]
-    
-    elif 'business' in occasion_lower or 'work' in occasion_lower or 'office' in occasion_lower:
-        if gender.lower() in ['male', 'man', 'men']:
-            main = "Navy or charcoal business suit with light blue dress shirt, conservative tie, and black leather dress shoes"
-            alternatives = ["Blazer with dress pants and button-down", "Sweater vest with dress shirt and trousers"]
-        else:
-            main = "Professional blouse with tailored pants or pencil skirt, blazer, and closed-toe heels"
-            alternatives = ["Sheath dress with cardigan", "Button-down shirt with A-line skirt"]
-    
-    elif 'casual' in occasion_lower or 'weekend' in occasion_lower:
-        if gender.lower() in ['male', 'man', 'men']:
-            main = "Polo shirt or casual button-down with chinos or dark jeans, and loafers or clean sneakers"
-            alternatives = ["Henley shirt with jeans", "Casual blazer with polo and khakis"]
-        else:
-            main = "Comfortable blouse with jeans or casual dress with flats or comfortable sandals"
-            alternatives = ["Cardigan with leggings", "Tunic with straight-leg pants"]
-    
-    elif 'dinner' in occasion_lower or 'restaurant' in occasion_lower:
-        if gender.lower() in ['male', 'man', 'men']:
-            main = "Dress shirt with dress pants or dark jeans, optional blazer, and leather shoes"
-            alternatives = ["Sweater with chinos", "Button-down with blazer and loafers"]
-        else:
-            main = "Nice blouse with dress pants or knee-length dress with heels or dressy flats"
-            alternatives = ["Wrap dress with accessories", "Silk top with skirt"]
-    
-    else:
-        # General occasion
-        if gender.lower() in ['male', 'man', 'men']:
-            main = "Smart casual shirt with well-fitted pants and leather shoes or clean sneakers"
-            alternatives = ["Polo shirt with chinos", "Casual blazer with jeans"]
-        else:
-            main = "Versatile blouse with jeans or casual dress with comfortable yet stylish shoes"
-            alternatives = ["Cardigan with dress pants", "Tunic with leggings"]
-    
-    # Add seasonal considerations
-    seasonal_tips = []
-    if season_lower in ['winter', 'cold']:
-        seasonal_tips.append("Add a warm coat or wool overcoat")
-    elif season_lower in ['summer', 'hot']:
-        seasonal_tips.append("Choose breathable fabrics like cotton or linen")
-    elif season_lower in ['spring', 'fall', 'autumn']:
-        seasonal_tips.append("Layer with a light jacket or cardigan")
-    
-    if seasonal_tips:
-        alternatives = alternatives + seasonal_tips
-    
-    return {
-        "main_suggestion": main,
-        "alternatives": alternatives[:3],  # Limit to 3 alternatives
-        "confidence_score": 0.8  # Higher confidence for curated responses
-    }
+# ... rest of the file remains the same ...
 
-def generate_outfit_suggestion(prompt, gender, season='all'):
+def predict_outfit(prompt, gender, season='all'):
     try:
-        logger.info(f"Generating outfit for: {sanitize_for_logging(prompt)}, gender: {gender}, season: {season}")
-        
-        # Try a few public models quickly, but don't spend too much time
-        full_prompt = create_fashion_prompt(prompt, gender, season)
-        result_data = None
-        successful_model = None
-        
-        # Only try 2 models quickly
-        for i, model_name in enumerate(FALLBACK_MODELS[:2]):
-            model_url = f"https://api-inference.huggingface.co/models/{model_name}"
-            logger.info(f"Trying public model: {model_name}")
-            
-            result_data = try_model_with_fallback(full_prompt, model_url, max_retries=1)
-            if result_data:
-                successful_model = model_name
-                logger.info(f"Successfully got response from: {successful_model}")
-                break
-            else:
-                logger.info(f"Model {model_name} failed, trying next...")
-        
-        # Always use fallback for reliability (since API models are unreliable)
-        if not result_data:
-            logger.info("Using enhanced fallback response system")
-            suggestion = create_fallback_response(prompt, gender, season)
-            successful_model = "enhanced_fallback"
-        else:
-            try:
-                suggestion = parse_model_response(result_data, prompt, gender, season)
-            except Exception as parse_error:
-                logger.warning(f"Failed to parse model response: {sanitize_for_logging(str(parse_error))}")
-                suggestion = create_fallback_response(prompt, gender, season)
-                successful_model = "fallback_after_parse_error"
+        gender = gender.lower().strip()
+        if gender not in ['male', 'female', 'unisex']:
+            raise ValueError("Gender must be 'male', 'female', or 'unisex'")
 
-        # Ensure we have valid data
+        season = season.lower().strip()
+        valid_seasons = ['spring', 'summer', 'fall', 'winter', 'all']
+        if season not in valid_seasons:
+            raise ValueError(f"Season must be one of: {', '.join(valid_seasons)}")
+
+        pipeline = joblib.load(MODEL_PATH)
+
+        input_text = f"{prompt.lower().strip()} {gender} {season}"
+
+        prediction = pipeline.predict([input_text])[0]
+        probas = pipeline.predict_proba([input_text])[0]
+        classes = pipeline.classes_
+
+        # Get top 2 alternatives excluding the main prediction
+        top_predictions = sorted(zip(classes, probas), key=lambda x: x[1], reverse=True)[:5]
+        alternatives = [outfit for outfit, _ in top_predictions if outfit != prediction][:2]
+
         result = {
             "status": "success",
-            "outfitSuggestion": suggestion.get("main_suggestion", f"Appropriate attire for {prompt}"),
-            "alternatives": suggestion.get("alternatives", ["Consider seasonal appropriate clothing"]),
+            "outfitSuggestion": prediction,
+            "alternatives": alternatives,
             "gender": gender,
             "season": season,
-            "confidence": float(suggestion.get("confidence_score", 0.8)),
-            "message": "Outfit suggestion generated successfully",
-            "model_used": successful_model or "enhanced_fallback"
+            "message": "Enhanced prediction successful",
+            "confidence": float(max(probas))
         }
 
-        print(json.dumps(result, ensure_ascii=False, indent=None))
+        # Print only the JSON to stdout
+        print(json.dumps(result), file=sys.stdout)
 
     except Exception as e:
-        logger.error(f"Prediction failed: {sanitize_for_logging(str(e))}")
-        # Even in error case, provide a basic outfit suggestion
-        try:
-            fallback_suggestion = create_fallback_response(prompt or "general", gender, season)
-            result = {
-                "status": "success",
-                "outfitSuggestion": fallback_suggestion["main_suggestion"],
-                "alternatives": fallback_suggestion["alternatives"],
-                "gender": gender,
-                "season": season,
-                "confidence": 0.7,
-                "message": "Outfit suggestion generated using fallback system",
-                "model_used": "error_fallback"
-            }
-            print(json.dumps(result))
-        except Exception as final_error:
-            error_result = {
-                "status": "error",
-                "message": "Unable to generate outfit suggestion. Please try again.",
-                "error_type": "generation_error"
-            }
-            print(json.dumps(error_result))
-            sys.exit(1)
+        logger.error(f"Prediction failed: {str(e)}")
+        error_result = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_result), file=sys.stdout)
+
+def check_and_train_model():
+    if not os.path.exists(MODEL_PATH):
+        logger.info("Enhanced model not found. Starting training...")
+        train_model()
+    else:
+        model_time = os.path.getmtime(MODEL_PATH)
+        data_time = os.path.getmtime(DATA_PATH)
+        if data_time > model_time:
+            logger.info("Dataset has been updated. Retraining model...")
+            train_model()
 
 def main():
     try:
+        check_and_train_model()
+
+        # If only one argument (besides script name), treat as prompt
         if len(sys.argv) == 2:
-            generate_outfit_suggestion(sys.argv[1], 'unisex')
+            prompt = sys.argv[1]
+            gender = 'unisex'
+            season = 'all'
+            predict_outfit(prompt, gender, season)
         elif len(sys.argv) >= 3:
             occasion = sys.argv[1]
             gender = sys.argv[2].lower()
             season = sys.argv[3].lower() if len(sys.argv) > 3 else 'all'
-            generate_outfit_suggestion(occasion, gender, season)
+            predict_outfit(occasion, gender, season)
         else:
             raise ValueError("Please provide either a prompt or occasion and gender (optional: season)")
 
@@ -338,7 +196,7 @@ def main():
             "status": "error",
             "message": str(e)
         }
-        print(json.dumps(error_result))
+        print(json.dumps(error_result), file=sys.stdout)
         sys.exit(1)
 
 if __name__ == "__main__":
