@@ -27,6 +27,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    //allow the mentioned origin requests
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
