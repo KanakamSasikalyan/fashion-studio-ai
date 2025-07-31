@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - ubc-fashion-studio-ai-backend-container
+name: Build and deploy Docker container to Azure Web App - backend-fashion-studio-ai
 
 on:
   push:
@@ -9,43 +9,61 @@ on:
       - feature/main-backend-deployment
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: 'ubc-fashion-studio-ai-backend-container'
+  AZURE_WEBAPP_SLOT: 'Production'
+  CONTAINER_REGISTRY: 'ghcr.io'
+
 jobs:
-  build:
-    runs-on: 'ubuntu-latest'
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Log in to registry
-      uses: docker/login-action@v2
-      with:
-        registry: https://gcr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_c4ede6201a2f4d2fa806a711b5e2b692 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_6b39e3438c1c4b13a30aa0878263ab02 }}
-
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v3
-      with:
-        push: true
-        tags: gcr.io/${{ secrets.AzureAppService_ContainerUsername_c4ede6201a2f4d2fa806a711b5e2b692 }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}
-        file: ./Dockerfile
-
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    needs: build
     environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      name: 'Production'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
 
     steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'ubc-fashion-studio-ai-backend-container'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_cd3b5cea7ae04d98b5ec98b644394921 }}
-        images: 'gcr.io/${{ secrets.AzureAppService_ContainerUsername_c4ede6201a2f4d2fa806a711b5e2b692 }}/kanakamsasikalyan/fashion-studio-ai:${{ github.sha }}'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set lowercase REPO_NAME
+        run: echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.CONTAINER_REGISTRY }}/${{ env.REPO_NAME }}:latest
+            ${{ env.CONTAINER_REGISTRY }}/${{ env.REPO_NAME }}:${{ github.sha }}
+          file: ./Dockerfile
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_AUGUST_DEPLOYMENT }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_AUGUST_DEPLOYMENT }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_AUGUST_DEPLOYMENT }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: ${{ env.AZURE_WEBAPP_SLOT }}
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.REPO_NAME }}:${{ github.sha }}
