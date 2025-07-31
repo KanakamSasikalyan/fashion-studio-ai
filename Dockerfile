@@ -1,4 +1,4 @@
-# ===== Stage 1: Build the application =====
+# ===== Stage 1: Build the application ======
 FROM openjdk:17-jdk-slim as builder
 
 # Install Python and required dependencies
