@@ -1,5 +1,5 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# More GitHub Actions for Azure: https://github.com/Azure/actions #
 
 name: Build and deploy Docker container to Azure Web App - backend-fashion-studio-ai
 
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: 'ubc-fashion-studio-ai-backend'
+  AZURE_WEBAPP_NAME: 'ubc-fashion-studio-ai-backend-container'
   AZURE_WEBAPP_SLOT: 'Production'
   CONTAINER_REGISTRY: 'ghcr.io'
 
@@ -56,9 +56,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_MAHESHCHATARASUPALLIUBC2025 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_MAHESHCHATARASUPALLIUBC2025 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_MAHESHCHATARASUPALLIUBC2025 }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_AUGUST_DEPLOYMENT }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_AUGUST_DEPLOYMENT }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_AUGUST_DEPLOYMENT }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
