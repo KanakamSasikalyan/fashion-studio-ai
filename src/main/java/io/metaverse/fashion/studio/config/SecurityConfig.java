@@ -34,7 +34,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:8080",
-                "https://ubc-fashion-studio-ai-frontend-container-efadeqfwfkfgg4dm.canadacentral-01.azurewebsites.net" // Add this line
+                "https://ubc-fashion-studio-ai-frontend-container-efadeqfwfkfgg4dm.centralus-01.azurewebsites.net" // Add this line
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
