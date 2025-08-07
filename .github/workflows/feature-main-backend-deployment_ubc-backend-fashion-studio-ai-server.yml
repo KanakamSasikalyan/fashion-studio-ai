@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions #
 
-name: Build and deploy Docker container to Azure Web App - backend-fashion-studio-ai
+name: Build and deploy Docker container to Azure Web App - ubc-backend-fashion-studio-ai-server
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: 'ubc-fashion-studio-ai-backend-container'
+  AZURE_WEBAPP_NAME: 'ubc-backend-fashion-studio-ai-server'
   AZURE_WEBAPP_SLOT: 'Production'
   CONTAINER_REGISTRY: 'ghcr.io'
 
