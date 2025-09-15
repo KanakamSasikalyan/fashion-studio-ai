@@ -1,6 +1,6 @@
-# Fashion Studio AI
+# Fashion Studio AI - Backend Interface
 
-## Project Overview
+## Project Overview 
 Fashion Studio AI is an innovative project aimed at generating high-quality clothing designs based on user prompts. By leveraging state-of-the-art AI models like Stable Diffusion, the system creates unique and visually appealing clothing designs tailored to user preferences. The project integrates advanced AI techniques with cloud-based storage to deliver seamless and efficient design generation.
 
 ## Main Goal
